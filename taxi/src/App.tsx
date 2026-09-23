@@ -10,32 +10,48 @@ import ResetPasswordPage from './features/auth/pages/ResetPasswordPage';
 import Home from './features/home/pages/Home';
 import { AppLayout } from './components/AppLayout';
 import { TooltipProvider } from './components/ui/tooltip';
+import ProtectedRoute from './ProtectedRoute';
+import { intializeAuth } from './features/auth/api/initializeAuth';
+import { useEffect } from 'react';
 
 const queryClient = new QueryClient();
 
 function App() {
+  
+  useEffect(() => {
+    intializeAuth()
+  }, [])
+  
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
       <BrowserRouter>
+
+
         <Routes>
-          {/* Auth routes — no sidebar */}
+          {/* Public routes */}
+        {/* Auth routes — no sidebar */}
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/verify-email" element={<EmailVerifyPage />} />
           <Route path="/forgot-password" element={<ReqResetPassword />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
           <Route
             path="/reset-password/:token"
             element={<ResetPasswordPage />}
           />
 
+
+        {/* Protected routes */}
+        <Route element={<ProtectedRoute />}>
           {/* App routes — wrapped in the sidebar layout */}
           <Route element={<AppLayout />}>
             <Route path="/home" element={<Home />} />
           </Route>
+        </Route>
 
-          <Route path="*" element={<Navigate to="/login" replace />} />
+
         </Routes>
       </BrowserRouter>
       <Toaster />

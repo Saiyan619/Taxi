@@ -26,7 +26,7 @@ apiClient.interceptors.request.use(
 
 let refreshPromise: Promise<{ status: number; accessToken: string }> | null = null;
 
-const attemptRefresh = async (): Promise<{ status: number; accessToken: string }> => {
+export const attemptRefresh = async (): Promise<{ status: number; accessToken: string }> => {
   if (refreshPromise) {
     return refreshPromise;
   }
@@ -81,7 +81,13 @@ apiClient.interceptors.response.use(
         }
       } catch (refreshError) {
         console.log("could not refresh so im sending you back to the login page")
-        window.location.href = '/login'; 
+        // commented this because:
+        // window.location.href forces a full page reload/hard navigation — it throws away your entire SPA state and re-downloads everything, which is heavy-handed and defeats the point of using React Router
+        // let ProtectedRoute — which is reactively watching that state — handle the actual navigation via React Router's <Navigate>, which is a soft client-side redirect.
+        // window.location.href = '/login'; 
+        const setIsAuthenticated = useAuth.getState().setIsAuthenticated;
+        setIsAuthenticated(false);
+        useAuth.getState().clearToken()
         return Promise.reject(refreshError);
       }
     }

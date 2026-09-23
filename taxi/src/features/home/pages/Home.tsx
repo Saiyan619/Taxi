@@ -1,30 +1,3 @@
-// import { useAuth } from '@/stores/authStore'
-// import { useGetMe } from '../hooks/userHook'
-
-// const Home = () => {
-//     const token = useAuth((state) => state.accessTk)
-//     console.log('token:', token)
-//     const { data: user, isLoading, refetch } = useGetMe();
-
-//     function getUser() {
-//       refetch().then((res) => {
-//         console.log('user:', res.data);
-//       });
-//     }
-
-//   return (
-//     <div>
-//       Welcome to the Home Page
-//       <button onClick={getUser}>Get User</button>
-//         <div>
-//         </div>
-//     </div>
-//   )
-// }
-
-// export default Home;
-
-
 import * as React from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -38,6 +11,7 @@ import { Sparkles, Plus, Loader2 } from "lucide-react";
 import { useAuth } from '@/stores/authStore'
 import { useGetMe } from '../hooks/userHook'
 import { useEffect } from "react";
+import { useGenerateContent } from "@/features/ai/hooks/aiHook";
 // Tone presets — swap for whatever your backend actually supports, or load
 // custom user-defined tones and append them after these.
 const tonePresets = [
@@ -47,46 +21,39 @@ const tonePresets = [
   { value: "friendly-note", label: "Friendly Note" },
 ];
 
+
 const PLACEHOLDER = `hey how are you doing ive been trying to talk to you now but i can't because it seems you're busy
 i just wanted to say i love your works and also i noticed that your were in search for a frontend dev, i just wanted to say i think im the man for the job
 please i need this job and ill really appreciate if you just give my resume a chance to be looked at
 and i promise to deliver if i do get this job, thank you`;
 
+
 export default function Home() {
   const [draft, setDraft] = React.useState("");
-  const [tone, setTone] = React.useState<string>("work-email");
-  const [isGenerating, setIsGenerating] = React.useState(false);
+  const [tone, setTone] = React.useState<string[]>(["work-email"]);
+  // console.log(tone)
   const [result, setResult] = React.useState<string | null>(null);
   const token = useAuth((state) => state.accessTk)
-    console.log('token:', token)
-    const { data: user, isLoading, refetch } = useGetMe();
+  const {generate, isPending, data} = useGenerateContent()
+    // console.log('token:', token)
+    const { data: user, refetch } = useGetMe();
 
-    function getUser() {
-      refetch().then((res) => {
-        console.log('user:', res.data);
-      });
+    // function getUser() {
+    //   refetch().then((res) => {
+    //     console.log('user:', res.data);
+    //   });
+    // }
+
+    const generateAIContent = () => {
+      generate({ raw_text: draft, tone: tone[0] })
+      setResult(data?.data?.result)
+      console.log('data:', data?.data?.result)
     }
+
     useEffect(() => {
       user && console.log('user:', user);
     }, [user])
     
-  const canGenerate = draft.trim().length > 0 && !isGenerating;
-
-  const handleGenerate = async () => {
-    if (!canGenerate) return;
-    setIsGenerating(true);
-    setResult(null);
-    try {
-      // TODO: replace with your real generation endpoint
-      // const res = await api.post("/generate", { draft, tone });
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      setResult(
-        "To ensure we thoroughly test all edge cases and avoid bugs in production, I recommend pushing our release back two days to Thursday."
-      );
-    } finally {
-      setIsGenerating(false);
-    }
-  };
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 py-6">
@@ -113,30 +80,33 @@ export default function Home() {
           <span className="text-xs text-muted-foreground">
             {draft.length} characters
           </span>
-          <Button
-            onClick={handleGenerate}
-            disabled={!canGenerate}
+          {isPending ? <Button
+            onClick={generateAIContent}
+            disabled={true}
             className="gap-1.5"
           >
-            {isGenerating ? (
-              <>
+             <>
                 <Loader2 className="size-4 animate-spin" />
                 Generating...
               </>
-            ) : (
-              <>
+          </Button>
+          :
+          <Button
+            onClick={generateAIContent}
+            className="gap-1.5"
+          >
+             <>
                 <Sparkles className="size-4" />
                 Generate
               </>
-            )}
-          </Button>
+
+          </Button>}
         </div>
       </div>
 
       {/* Tone selector */}
       <div className="flex flex-wrap items-center gap-2">
         <ToggleGroup
-          type="single"
           value={tone}
           onValueChange={(value) => value && setTone(value)}
           className="flex flex-wrap gap-2"
@@ -175,7 +145,7 @@ export default function Home() {
           <span className="text-xs font-medium uppercase tracking-wide text-primary">
             Rewritten
           </span>
-          <p className="mt-2 text-sm leading-relaxed text-foreground">
+          <p className="mt-3 min-h-56 whitespace-pre-wrap text-sm leading-relaxed text-foreground">
             {result}
           </p>
         </div>
@@ -183,3 +153,5 @@ export default function Home() {
     </div>
   );
 }
+
+

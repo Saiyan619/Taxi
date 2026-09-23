@@ -5,6 +5,8 @@ import axios from "axios";
 import { useAuth } from "@/stores/authStore";
 import { useNavigate } from "react-router";
 
+const useAuthStore = useAuth.getState();
+
 export const useRegister = () => {
 
     const { mutateAsync: registerUser, isPending, isError } = useMutation({
@@ -92,11 +94,12 @@ export const useVerifyEmail = () => {
 
 export const useLogin = () => {
   const navigate = useNavigate();
-  const setAccessToken = useAuth((s) => s.setAccessToken);
+  // const setAccessToken = useAuth((s) => s.setAccessToken);
     const { mutateAsync: loginUser, isPending, isError, isSuccess } = useMutation({
         mutationFn: login,
         onSuccess: (data) => {
-        setAccessToken(data.token);
+          useAuthStore.setAccessToken(data.token);
+          useAuthStore.setIsAuthenticated(true);
             console.log(data);
             toast.add({
                 type: "success",
