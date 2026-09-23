@@ -41,3 +41,15 @@ export const passwordResetTokens = pgTable('password_reset_tokens', {
   expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 })
+
+
+export const articulations = pgTable('articulations', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  title: varchar("title", { length: 200 }).notNull(),
+  userId: uuid('user_id').notNull().references(() => users.id),
+  rawText: text("raw_text").notNull(),
+  tone: varchar("tone", { length: 50 }).notNull(),
+  result: text("result").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true,}).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true,}).defaultNow().notNull(),
+});

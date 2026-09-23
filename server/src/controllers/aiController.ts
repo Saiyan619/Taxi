@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
 import OpenAI from 'openai'
 import z from "zod";
+import { db } from "../db/db.js";
+import { articulations } from "../db/schema.js";
+import { eq } from "drizzle-orm";
 
 const promptSchema = z.object({
     raw_text: z.string().min(6, 'prompt must be at least 6 characters long').max(2000, 'prompt must be at max 2000 characters long'),
@@ -14,7 +17,7 @@ export const aiTextConverter = async(req: Request, res: Response) => {
         const {raw_text, tone} = result.data;
     // const { raw_text, tone } = req.body;
         const user = req.user;
-
+        
     if (user) {
         const client = new OpenAI({
         baseURL: 'https://api.groq.com/openai/v1',
@@ -27,9 +30,28 @@ export const aiTextConverter = async(req: Request, res: Response) => {
             to a well articulated and eloquent version i want the tone to be ${tone}` }]
     })
 
+    const content = response.choices[0].message.content;
+    
+    if (!content) {
+    throw new Error("AI returned no content");
+    }
+
+    // in V2, i'll make the title Ai generated
+    const title = raw_text.length > 50
+    ? raw_text.slice(0, 50) + "..."
+    : raw_text;
+
+    const [articulation] = await db.insert(articulations).values({
+        userId: user.id,
+        title: title,
+    rawText: raw_text,
+    tone: tone,
+    result: content
+    }).returning();
+
     console.log(response.choices[0].message.content)
 
-    res.status(200).json({result: response.choices[0].message.content});
+    res.status(200).json({Generated_result: response.choices[0].message.content, articulation: articulation});
     }else{
         res.status(401).json({message: "this user is not authenticated/authorised to call this"})
     }
@@ -41,7 +63,19 @@ export const aiTextConverter = async(req: Request, res: Response) => {
 
 }
 
+export const getArticulations = async (req:Request, res: Response) => {
+    const user = req.user;
+    if (!user) {
+        return res.status(403).json({message: "user doesnt exist to make this call!!"})
+    }
+    const [articulation] = await db.select().from(articulations).where(eq(user.id, user.id));
+    if (!articulation) {
+      return res.status(403).json({message: "sorry could not get the user articulations, something went wrong"});  
+    }
+    return res.status(200).json({articulation:articulation})
+}
 
+//Docs guide:
 // const client = new OpenAI({
 //   baseURL: 'https://api.groq.com/openai/v1',
 //   apiKey: process.env.GROQ_API_KEY
