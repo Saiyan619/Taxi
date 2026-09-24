@@ -3,7 +3,7 @@ import OpenAI from 'openai'
 import z from "zod";
 import { db } from "../db/db.js";
 import { articulations } from "../db/schema.js";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 const promptSchema = z.object({
     raw_text: z.string().min(6, 'prompt must be at least 6 characters long').max(2000, 'prompt must be at max 2000 characters long'),
@@ -27,7 +27,8 @@ export const aiTextConverter = async(req: Request, res: Response) => {
     const response = await client.chat.completions.create({
         model: 'openai/gpt-oss-120b',
         messages: [{ role: 'user', content: `I want you to convert my raw text(i don't know to articulate):${raw_text}
-            to a well articulated and eloquent version i want the tone to be ${tone}` }]
+            to a well articulated and eloquent version i want the tone to be ${tone}, and its very important to also note 
+            this: ** - i don't like it don't add to anything where its a major header e.g Subject **` }]
     })
 
     const content = response.choices[0].message.content;
@@ -86,6 +87,71 @@ export const getArticulations = async (req:Request, res: Response) => {
 }
 
 
+export const deleteArticulation = async (req: Request, res: Response) => {
+    try {
+        const user = req.user;
+
+        if (!user) {
+            return res.status(401).json({
+                message: "User is not authenticated"
+            });
+        }
+
+        const { id } = req.params;
+
+        const [articulation] = await db
+            .delete(articulations)
+            .where(
+                and(
+                    eq(articulations.id, id as string),
+                    eq(articulations.userId, user.id)
+                )
+            )
+            .returning();
+
+        if (!articulation) {
+            return res.status(404).json({
+                message: "Articulation not found"
+            });
+        }
+
+        return res.status(200).json({
+            message: "Articulation deleted successfully"
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            message: "DB error: something went wrong",
+            error: error
+        });
+    }
+};
+
+export const deleteAllArticulations = async (req: Request, res: Response) => {
+    try {
+         const user = req.user;
+
+        if (!user) {
+            return res.status(401).json({
+                message: "User is not authenticated"
+            });
+        }
+
+        const deletedArticulations = await db
+            .delete(articulations)
+            .where(eq(articulations.userId, user.id))
+            .returning();
+
+        return res.status(200).json({
+            message: "All articulations deleted successfully",
+            deletedCount: deletedArticulations.length
+        });
+
+
+    } catch (error) {
+        res.status(500).json({message: "db error; something went wrong"})
+    }
+}
 
 //Docs guide:
 // const client = new OpenAI({

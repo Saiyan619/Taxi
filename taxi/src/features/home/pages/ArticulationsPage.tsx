@@ -12,8 +12,30 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Search, Copy, Check, Inbox, TriangleAlert } from "lucide-react";
-import { useGetGeneratedContent } from "@/features/ai/hooks/aiHook";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+import {
+  Search,
+  Copy,
+  Check,
+  Inbox,
+  TriangleAlert,
+  Trash2,
+  Loader2,
+} from "lucide-react";
+import {
+  useDeleteAllGeneratedContent,
+  useDeleteGeneratedContent,
+  useGetGeneratedContent,
+} from "@/features/ai/hooks/aiHook";
 
 type Generation = {
   id: string;
@@ -85,6 +107,9 @@ function CopyButton({ text }: { text: string }) {
 const ArticulationsPage = () => {
   const { generatedData, isLoading, isError, refetch } = useGetGeneratedContent();
   console.log("Generated Content Data:", generatedData);
+  const { deleteContent, isPending: isDeleting } = useDeleteGeneratedContent();
+  const { deleteAllContent, isPending: isDeletingAll } =
+    useDeleteAllGeneratedContent();
 
   // Adjust this line if your hook actually resolves to `generatedData.data`
   // instead of the array itself — everything else works either way once
@@ -93,6 +118,17 @@ const ArticulationsPage = () => {
 
   const [search, setSearch] = React.useState("");
   const [selected, setSelected] = React.useState<Generation | null>(null);
+  // id of the generation the single-delete confirmation is open for — also
+  // doubles as "which card is mid-delete" so only that one shows a spinner.
+  const [confirmDeleteId, setConfirmDeleteId] = React.useState<string | null>(
+    null
+  );
+  // Separate from the single-delete flow on purpose — wiping everything
+  // deserves its own confirmation copy rather than sharing the "delete this
+  // one" dialog and having to branch its text/behavior.
+  const [confirmDeleteAll, setConfirmDeleteAll] = React.useState(false);
+
+  const isBusy = isDeleting || isDeletingAll;
 
   const filtered = generations.filter((g) => {
     const q = search.trim().toLowerCase();
@@ -104,15 +140,59 @@ const ArticulationsPage = () => {
     );
   });
 
+  const handleConfirmDelete = async () => {
+    if (!confirmDeleteId) return;
+    try {
+      await deleteContent({ id: confirmDeleteId });
+      if (selected?.id === confirmDeleteId) setSelected(null);
+      refetch();
+    } catch (err) {
+      console.error("Failed to delete generation:", err);
+    } finally {
+      setConfirmDeleteId(null);
+    }
+  };
+
+  const handleConfirmDeleteAll = async () => {
+    try {
+      await deleteAllContent();
+      setSelected(null);
+      refetch();
+    } catch (err) {
+      console.error("Failed to delete all generations:", err);
+    } finally {
+      setConfirmDeleteAll(false);
+    }
+  };
+
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 py-6 px-4 sm:px-6">
-      <div>
-        <h1 className="text-xl font-semibold text-foreground">
-          Your generations
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Everything Taxi has rewritten for you so far.
-        </p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-xl font-semibold text-foreground">
+            Your generations
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Everything Taxi has rewritten for you so far.
+          </p>
+        </div>
+
+        {generations.length > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 self-start text-destructive hover:bg-destructive/10 hover:text-destructive"
+            disabled={isBusy}
+            onClick={() => setConfirmDeleteAll(true)}
+          >
+            {isDeletingAll ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Trash2 className="size-4" />
+            )}
+            Delete all
+          </Button>
+        )}
       </div>
 
       <div className="relative">
@@ -167,32 +247,54 @@ const ArticulationsPage = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((g) => (
-            <Card
-              key={g.id}
-              onClick={() => setSelected(g)}
-              className="cursor-pointer gap-3 transition-colors hover:border-primary/40"
-            >
-              <CardHeader className="flex flex-row items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-foreground">
-                    {g.title}
+          {filtered.map((g) => {
+            const isDeletingThis = isDeleting && confirmDeleteId === g.id;
+            return (
+              <Card
+                key={g.id}
+                onClick={() => setSelected(g)}
+                className="cursor-pointer gap-3 transition-colors hover:border-primary/40"
+              >
+                <CardHeader className="flex flex-row items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-foreground">
+                      {g.title}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {formatDate(g.createdAt)}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <Badge variant="secondary" className="text-xs">
+                      {toneLabel(g.tone)}
+                    </Badge>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-7 text-muted-foreground hover:text-destructive"
+                      disabled={isDeletingThis || isDeletingAll}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setConfirmDeleteId(g.id);
+                      }}
+                    >
+                      {isDeletingThis ? (
+                        <Loader2 className="size-3.5 animate-spin" />
+                      ) : (
+                        <Trash2 className="size-3.5" />
+                      )}
+                      <span className="sr-only">Delete</span>
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+                    {g.result}
                   </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {formatDate(g.createdAt)}
-                  </p>
-                </div>
-                <Badge variant="secondary" className="shrink-0 text-xs">
-                  {toneLabel(g.tone)}
-                </Badge>
-              </CardHeader>
-              <CardContent>
-                <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
-                  {g.result}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
 
@@ -234,7 +336,20 @@ const ArticulationsPage = () => {
                 </div>
               </div>
 
-              <DialogFooter>
+              <DialogFooter className="gap-2 sm:justify-between">
+                <Button
+                  variant="ghost"
+                  className="gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  disabled={isBusy && confirmDeleteId === selected.id}
+                  onClick={() => setConfirmDeleteId(selected.id)}
+                >
+                  {isDeleting && confirmDeleteId === selected.id ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="size-4" />
+                  )}
+                  Delete
+                </Button>
                 <Button variant="outline" onClick={() => setSelected(null)}>
                   Close
                 </Button>
@@ -243,6 +358,73 @@ const ArticulationsPage = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Single delete confirmation */}
+      <AlertDialog
+        open={!!confirmDeleteId}
+        onOpenChange={(open) => !open && setConfirmDeleteId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this generation?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove it from your history. This
+              can't be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              disabled={isDeleting}
+              className="gap-1.5 bg-destructive text-white hover:bg-destructive/90"
+            >
+              {isDeleting ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Trash2 className="size-4" />
+              )}
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete-all confirmation */}
+      <AlertDialog
+        open={confirmDeleteAll}
+        onOpenChange={(open) => !open && setConfirmDeleteAll(false)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Delete all {generations.length} generation
+              {generations.length === 1 ? "" : "s"}?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This wipes your entire generation history and can't be
+              undone. Consider copying anything you still need first.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeletingAll}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDeleteAll}
+              disabled={isDeletingAll}
+              className="gap-1.5 bg-destructive text-white hover:bg-destructive/90"
+            >
+              {isDeletingAll ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Trash2 className="size-4" />
+              )}
+              Delete all
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
-import { generateContent, getContentGenerated } from "../api/aiApi"
+import { deleteAllContentGenerated, deleteContentGenerated, generateContent, getContentGenerated } from "../api/aiApi"
 import { toast } from "@/components/ui/toast";
 
 
@@ -36,4 +36,52 @@ export const useGetGeneratedContent = () => {
     })
 
     return { generatedData: data?.data?.articulation, isLoading, isError, refetch }
+}
+
+export const useDeleteGeneratedContent = () => {
+    const { mutateAsync: deleteContent, isPending, isError } = useMutation({
+        mutationFn: deleteContentGenerated,
+        onSuccess: () => {
+            toast.add({
+                type: "success",
+                title: "Content Deletion Successful",
+                description: `The generated content has been deleted.`,
+            });
+        },
+        onError: (error) => {
+            console.error("Error deleting content:", error);
+            toast.add({
+                type: "error",
+                title: "Content Deletion Failed",
+                description: `Failed to delete content. Please try again.`,
+                priority: "high",
+            });
+        }
+    });
+
+    return { deleteContent, isPending, isError };
+}
+
+export const useDeleteAllGeneratedContent = () => {
+    const { mutateAsync: deleteAllContent, isPending, isError } = useMutation({
+        mutationFn: deleteAllContentGenerated,
+        onSuccess: () => {
+            toast.add({
+                type: "success",
+                title: "Content Deletion Successful",
+                description: `The generated content has been deleted.`,
+            });
+        },
+        onError: (error) => {
+            console.error("Error deleting content:", error);
+            toast.add({
+                type: "error",
+                title: "Content Deletion Failed",
+                description: `Failed to delete content. Please try again.`,
+                priority: "high",
+            });
+        }
+    });
+
+    return { deleteAllContent, isPending, isError };
 }
