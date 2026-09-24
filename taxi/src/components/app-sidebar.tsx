@@ -41,11 +41,13 @@ import {
   SidebarRail,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
+
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,6 +58,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useGetGeneratedContent } from "@/features/ai/hooks/aiHook";
 
 // ---------------------------------------------------------------------------
 // Static data — swap these for real data from your auth/session + API layer.
@@ -67,20 +70,20 @@ const workspaces = [
 ];
 
 const mainNav = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Inbox", url: "/inbox", icon: Inbox, badge: "12" },
-  {
-    title: "Projects",
-    icon: FolderKanban,
-    items: [
-      { title: "Website Redesign", url: "/projects/website-redesign" },
-      { title: "Mobile App", url: "/projects/mobile-app" },
-      { title: "Q3 Marketing", url: "/projects/q3-marketing" },
-    ],
-  },
-  { title: "Tasks", url: "/tasks", icon: CheckSquare },
-  { title: "Calendar", url: "/calendar", icon: CalendarDays },
-  { title: "Analytics", url: "/analytics", icon: BarChart3 },
+  { title: "Home", url: "/home", icon: LayoutDashboard },
+  { title: "Articulations", url: "/articulations", icon: Inbox },
+  // {
+  //   title: "Projects",
+  //   icon: FolderKanban,
+  //   items: [
+  //     { title: "Website Redesign", url: "/projects/website-redesign" },
+  //     { title: "Mobile App", url: "/projects/mobile-app" },
+  //     { title: "Q3 Marketing", url: "/projects/q3-marketing" },
+  //   ],
+  // },
+  // { title: "Tasks", url: "/tasks", icon: CheckSquare },
+  // { title: "Calendar", url: "/calendar", icon: CalendarDays },
+  // { title: "Analytics", url: "/analytics", icon: BarChart3 },
 ] as const;
 
 const secondaryNav = [
@@ -100,6 +103,8 @@ const currentUser = {
 export function AppSidebar() {
   const location = useLocation();
   const [activeWorkspace, setActiveWorkspace] = React.useState(workspaces[0]);
+  const { generatedData } = useGetGeneratedContent();
+    // console.log("Generated Content Data:", generatedData);
 
   const isActive = (url: string) => location.pathname === url;
 
@@ -197,39 +202,39 @@ export function AppSidebar() {
             <SidebarMenu>
               {mainNav.map((item) => {
                 if ("items" in item) {
-                  return (
-                    <Collapsible
-                      key={item.title}
-                      defaultOpen={item.items.some((sub) =>
-                        isActive(sub.url)
-                      )}
-                      className="group/collapsible"
-                    >
-                      <SidebarMenuItem>
-                        <CollapsibleTrigger
-                          render={<SidebarMenuButton tooltip={item.title} />}
-                        >
-                          <item.icon />
-                          <span>{item.title}</span>
-                          <ChevronRight className="ml-auto size-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <SidebarMenuSub>
-                            {item.items.map((sub) => (
-                              <SidebarMenuSubItem key={sub.title}>
-                                <SidebarMenuSubButton
-                                  render={<Link to={sub.url} />}
-                                  isActive={isActive(sub.url)}
-                                >
-                                  <span>{sub.title}</span>
-                                </SidebarMenuSubButton>
-                              </SidebarMenuSubItem>
-                            ))}
-                          </SidebarMenuSub>
-                        </CollapsibleContent>
-                      </SidebarMenuItem>
-                    </Collapsible>
-                  );
+                  // return (
+                  //   <Collapsible
+                  //     key={item.title}
+                  //     defaultOpen={item.items.some((sub) =>
+                  //       isActive(sub.url)
+                  //     )}
+                  //     className="group/collapsible"
+                  //   >
+                  //     <SidebarMenuItem>
+                  //       <CollapsibleTrigger
+                  //         render={<SidebarMenuButton tooltip={item.title} />}
+                  //       >
+                  //         <item.icon />
+                  //         <span>{item.title}</span>
+                  //         <ChevronRight className="ml-auto size-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                  //       </CollapsibleTrigger>
+                  //       <CollapsibleContent>
+                  //         <SidebarMenuSub>
+                  //           {item.items.map((sub) => (
+                  //             <SidebarMenuSubItem key={sub.title}>
+                  //               <SidebarMenuSubButton
+                  //                 render={<Link to={sub.url} />}
+                  //                 isActive={isActive(sub.url)}
+                  //               >
+                  //                 <span>{sub.title}</span>
+                  //               </SidebarMenuSubButton>
+                  //             </SidebarMenuSubItem>
+                  //           ))}
+                  //         </SidebarMenuSub>
+                  //       </CollapsibleContent>
+                  //     </SidebarMenuItem>
+                  //   </Collapsible>
+                  // );
                 }
 
                 return (
@@ -242,8 +247,11 @@ export function AppSidebar() {
                       <item.icon />
                       <span>{item.title}</span>
                     </SidebarMenuButton>
-                    {"badge" in item && item.badge && (
-                      <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
+                    {item.title === "Articulations" && (
+                      generatedData?.length > 0 ? (
+                      <SidebarMenuBadge>{generatedData?.length}</SidebarMenuBadge>
+                    ) : (
+                    <SidebarMenuBadge>0</SidebarMenuBadge> )
                     )}
                   </SidebarMenuItem>
                 );
@@ -252,7 +260,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup className="mt-auto">
+        <SidebarGroup >
           <SidebarGroupLabel>Support</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>

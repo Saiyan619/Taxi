@@ -49,7 +49,8 @@ export const aiTextConverter = async(req: Request, res: Response) => {
     result: content
     }).returning();
 
-    console.log(response.choices[0].message.content)
+    console.log("articulation has been created and stored!!");
+    console.log(response.choices[0].message.content);
 
     res.status(200).json({Generated_result: response.choices[0].message.content, articulation: articulation});
     }else{
@@ -63,17 +64,28 @@ export const aiTextConverter = async(req: Request, res: Response) => {
 
 }
 
+
 export const getArticulations = async (req:Request, res: Response) => {
-    const user = req.user;
+    try {
+        const user = req.user;
+    console.log(`my user id: ${user.id}`);
     if (!user) {
         return res.status(403).json({message: "user doesnt exist to make this call!!"})
     }
-    const [articulation] = await db.select().from(articulations).where(eq(user.id, user.id));
-    if (!articulation) {
-      return res.status(403).json({message: "sorry could not get the user articulations, something went wrong"});  
+
+    const userArticulation = await db.select().from(articulations).where(eq(articulations.userId, user.id));
+    if (userArticulation.length > 0) {
+        return res.status(200).json({articulation:userArticulation})
+    }else {
+         return res.status(200).json({message: "sorry you have no articulation currently", articulation:userArticulation})
     }
-    return res.status(200).json({articulation:articulation})
+    
+    } catch (error) {
+        return res.status(500).json({message: "db issue; something went wrong"})
+    }
 }
+
+
 
 //Docs guide:
 // const client = new OpenAI({

@@ -13,6 +13,7 @@ import { TooltipProvider } from './components/ui/tooltip';
 import ProtectedRoute from './ProtectedRoute';
 import { intializeAuth } from './features/auth/api/initializeAuth';
 import { useEffect } from 'react';
+import ArticulationsPage from './features/home/pages/ArticulationsPage';
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ function App() {
           {/* App routes — wrapped in the sidebar layout */}
           <Route element={<AppLayout />}>
             <Route path="/home" element={<Home />} />
+            <Route path="/articulations" element={<ArticulationsPage />} />
           </Route>
         </Route>
 

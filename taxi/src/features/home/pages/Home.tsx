@@ -25,7 +25,7 @@ import { useGetMe } from "../hooks/userHook";
 import { useGenerateContent } from "@/features/ai/hooks/aiHook";
 
 // Tone presets — swap for whatever your backend actually supports, or load
-// custom user-defined tones and append them after these.
+// custom user-defined tones and append them after these. 
 const tonePresets = [
   { value: "executive-memo", label: "Executive Memo" },
   { value: "casual-sync", label: "Casual Sync" },
@@ -53,6 +53,7 @@ export default function Home() {
   const [tone, setTone] = React.useState<string[]>(["work-email"]);
   const [result, setResult] = React.useState<string | null>(null);
   console.log(tone)
+  const { generate, Generated_result, isPending} = useGenerateContent()
 
   // Custom, user-defined tones — kept separate from the presets so we never
   // mutate the static list, just merge the two when rendering.
@@ -65,7 +66,6 @@ export default function Home() {
   const allTones = [...tonePresets, ...customTones];
 
   const token = useAuth((state) => state.accessTk);
-  const { generate, isPending, data } = useGenerateContent();
   const { data: user } = useGetMe();
 
   const generateAIContent = () => {
@@ -75,10 +75,10 @@ export default function Home() {
   // `data` only updates once the mutation resolves, so sync `result` off of
   // it rather than reading it synchronously right after calling generate().
   useEffect(() => {
-    if (data?.data?.result) {
-      setResult(data.data.result);
+    if (Generated_result) {
+      setResult(Generated_result);
     }
-  }, [data]);
+  }, [Generated_result]);
 
   const handleAddTone = () => {
     const label = newTone.trim();
