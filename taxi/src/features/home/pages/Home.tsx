@@ -23,6 +23,7 @@ import { Sparkles, Plus, Loader2 } from "lucide-react";
 import { useAuth } from "@/stores/authStore";
 import { useGetMe } from "../hooks/userHook";
 import { useGenerateContent } from "@/features/ai/hooks/aiHook";
+import SpeechToTxt from "@/features/ai/components/SpeechToTxt";
 
 // Tone presets — swap for whatever your backend actually supports, or load
 // custom user-defined tones and append them after these. 
@@ -123,23 +124,26 @@ export default function Home() {
           <span className="text-xs text-muted-foreground">
             {draft.length} characters
           </span>
-          <Button
-            onClick={generateAIContent}
-            disabled={isPending || !draft.trim()}
-            className="gap-1.5"
-          >
-            {isPending ? (
-              <>
-                <Loader2 className="size-4 animate-spin" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <Sparkles className="size-4" />
-                Generate
-              </>
-            )}
-          </Button>
+          <div className="flex items-center gap-2">
+            <SpeechToTxt value={draft} onChange={setDraft} />
+            <Button
+              onClick={generateAIContent}
+              disabled={isPending || !draft.trim()}
+              className="gap-1.5"
+            >
+              {isPending ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="size-4" />
+                  Generate
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </div>
 
