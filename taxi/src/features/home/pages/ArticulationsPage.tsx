@@ -51,10 +51,19 @@ type Generation = {
 // Same preset list as the composer, used to turn a tone value like
 // "work-email" into a human label like "Work Email".
 const tonePresets: Record<string, string> = {
-  "executive-memo": "Executive Memo",
-  "casual-sync": "Casual Sync",
+  "job-outreach": "Job Outreach",
+  "follow-up": "Follow-Up",
   "work-email": "Work Email",
+  "executive-memo": "Executive Memo",
+  "polite-decline": "Polite Decline",
+  apology: "Apology",
   "friendly-note": "Friendly Note",
+  "casual-sync": "Casual Sync",
+  "firm-but-calm": "Firm but Calm",
+  "ask-a-favor": "Ask a Favor",
+  reconnect: "Reconnect",
+  negotiation: "Negotiation",
+  "social-post": "Social Post",
 };
 
 function toneLabel(tone: string) {

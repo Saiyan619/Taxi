@@ -25,13 +25,72 @@ import { useGetMe } from "../hooks/userHook";
 import { useGenerateContent } from "@/features/ai/hooks/aiHook";
 import SpeechToTxt from "@/features/ai/components/SpeechToTxt";
 
-// Tone presets — swap for whatever your backend actually supports, or load
-// custom user-defined tones and append them after these. 
 const tonePresets = [
-  { value: "executive-memo", label: "Executive Memo" },
-  { value: "casual-sync", label: "Casual Sync" },
-  { value: "work-email", label: "Work Email" },
-  { value: "friendly-note", label: "Friendly Note" },
+  {
+    value: "job-outreach",
+    label: "Job Outreach",
+    description: "Messages to hiring managers, founders, and recruiters.",
+  },
+  {
+    value: "follow-up",
+    label: "Follow-Up",
+    description: "Friendly nudges when you have not heard back.",
+  },
+  {
+    value: "work-email",
+    label: "Work Email",
+    description: "Clear, professional emails for everyday work.",
+  },
+  {
+    value: "executive-memo",
+    label: "Executive Memo",
+    description: "Bottom-line-first writing for leaders and decisions.",
+  },
+  {
+    value: "polite-decline",
+    label: "Polite Decline",
+    description: "Say no while keeping the relationship strong.",
+  },
+  {
+    value: "apology",
+    label: "Apology",
+    description: "Own a mistake without over-apologizing.",
+  },
+  {
+    value: "friendly-note",
+    label: "Friendly Note",
+    description: "Warm messages for friends and family.",
+  },
+  {
+    value: "casual-sync",
+    label: "Casual Sync",
+    description: "Quick, chat-style messages for teammates.",
+  },
+  {
+    value: "firm-but-calm",
+    label: "Firm but Calm",
+    description: "Handle complaints and disagreements constructively.",
+  },
+  {
+    value: "ask-a-favor",
+    label: "Ask a Favor",
+    description: "Make referral, introduction, or advice requests.",
+  },
+  {
+    value: "reconnect",
+    label: "Reconnect",
+    description: "Reach out to someone you have not spoken to recently.",
+  },
+  {
+    value: "negotiation",
+    label: "Negotiation",
+    description: "Make confident salary and money asks.",
+  },
+  {
+    value: "social-post",
+    label: "Social Post",
+    description: "Write posts and replies for X and LinkedIn.",
+  },
 ];
 
 const PLACEHOLDER = `hey how are you doing ive been trying to talk to you now but i can't because it seems you're busy
@@ -51,10 +110,9 @@ function slugify(label: string) {
 
 export default function Home() {
   const [draft, setDraft] = React.useState("");
-  const [tone, setTone] = React.useState<string[]>(["work-email"]);
+  const [tone, setTone] = React.useState<string[]>(["job-outreach"]);
   const [result, setResult] = React.useState<string | null>(null);
-  console.log(tone)
-  const { generate, Generated_result, isPending} = useGenerateContent()
+  const { generate, Generated_result, isPending } = useGenerateContent();
 
   // Custom, user-defined tones — kept separate from the presets so we never
   // mutate the static list, just merge the two when rendering.
@@ -148,17 +206,30 @@ export default function Home() {
       </div>
 
       {/* Tone selector */}
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="space-y-3">
+        <div>
+          <p className="text-sm font-medium text-foreground">Choose a tone</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Pick the situation that best matches your message.
+          </p>
+        </div>
+
         <ToggleGroup
           value={tone}
           onValueChange={(value) => value && setTone(value)}
-          className="flex flex-wrap gap-2"
+          className="flex flex-wrap justify-start gap-2"
         >
           {allTones.map((preset) => (
             <ToggleGroupItem
               key={preset.value}
               value={preset.value}
-              className="h-9 rounded-full border border-border px-4 text-sm data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+              title={tonePresets.find((item) => item.value === preset.value)?.description}
+              aria-label={`${preset.label}${
+                "description" in preset && preset.description
+                  ? `: ${preset.description}`
+                  : ""
+              }`}
+              className="h-auto min-h-9 rounded-full border border-border px-3 py-2 text-sm data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
             >
               {preset.label}
             </ToggleGroupItem>
@@ -181,6 +252,13 @@ export default function Home() {
           </TooltipTrigger>
           <TooltipContent>Add a custom tone</TooltipContent>
         </Tooltip>
+
+        {tone[0] && (
+          <p className="text-xs text-muted-foreground">
+            {tonePresets.find((preset) => preset.value === tone[0])?.description ||
+              "Your custom tone will guide the rewrite."}
+          </p>
+        )}
       </div>
 
       {/* Custom tone modal */}

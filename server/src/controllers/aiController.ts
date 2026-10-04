@@ -4,6 +4,7 @@ import z from "zod";
 import { db } from "../db/db.js";
 import { articulations } from "../db/schema.js";
 import { and, eq } from "drizzle-orm";
+import { buildMessages } from "../utils/prompt.js";
 
 const promptSchema = z.object({
     raw_text: z.string().min(6, 'prompt must be at least 6 characters long').max(2000, 'prompt must be at max 2000 characters long'),
@@ -26,9 +27,8 @@ export const aiTextConverter = async(req: Request, res: Response) => {
 
     const response = await client.chat.completions.create({
         model: 'openai/gpt-oss-120b',
-        messages: [{ role: 'user', content: `I want you to convert my raw text(i don't know to articulate):${raw_text}
-            to a well articulated and eloquent version i want the tone to be ${tone}, and its very important to also note 
-            this: ** - i don't like it don't add to anything where its a major header e.g Subject **` }]
+        messages: buildMessages(raw_text, tone),
+        temperature: 0.6
     })
 
     const content = response.choices[0].message.content;
