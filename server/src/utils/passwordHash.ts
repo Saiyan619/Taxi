@@ -33,7 +33,6 @@ export const compareToken = async(enteredToken: string, storedToken: string): Pr
 // // Hash the password
 // bcrypt.hash(password, saltRounds, (err, hash) => {
 //   if (err) throw err;
-//   console.log('Hashed Password:', hash);
 // });
 
 // const bcrypt = require('bcrypt');
@@ -46,8 +45,6 @@ export const compareToken = async(enteredToken: string, storedToken: string): Pr
 // bcrypt.compare(enteredPassword, storedHash, (err, result) => {
 //   if (err) throw err;
 //   if (result) {
-//     console.log('Password is correct!');
 //   } else {
-//     console.log('Password is incorrect.');
 //   }
 // });

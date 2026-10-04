@@ -7,7 +7,6 @@ export const useGenerateContent = () => {
     const {mutateAsync: generate, isPending, data} = useMutation({
         mutationFn: generateContent,
          onSuccess: (data) => {
-            console.log(data?.data?.Generated_result);
             toast.add({
                 type: "success",
                 title: "Context Generation Successful",

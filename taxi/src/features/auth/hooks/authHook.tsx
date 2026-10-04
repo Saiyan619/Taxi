@@ -11,8 +11,7 @@ export const useRegister = () => {
 
     const { mutateAsync: registerUser, isPending, isError } = useMutation({
         mutationFn: register,
-        onSuccess: (data) => {
-            console.log(data);
+        onSuccess: () => {
             toast.add({
                 type: "success",
                 title: "Registration Successful",
@@ -21,15 +20,7 @@ export const useRegister = () => {
         },
        onError: (error) => {
   if (axios.isAxiosError(error)) {
-    console.log('code:', error.code);
-    console.log('config:', error.config);      // the request that was attempted — url, method, headers, baseURL
-    console.log('response:', error.response);  // undefined if the request never got a response at all
-    console.log('request:', error.request);    // the raw XHR/request object
     const message = error.response?.data?.message ?? error.message;
-    console.log('code:', error.code);
-    console.log('message:', error.message);
-    
-    console.log(message);
     toast.add({
       type: "error",
       title: "Registration Failed",
@@ -53,8 +44,7 @@ export const useRegister = () => {
 export const useVerifyEmail = () => {
     const { mutateAsync: verifyEmail, isPending, isError } = useMutation({
         mutationFn: verify,
-        onSuccess: (data) => {
-            console.log(data);
+        onSuccess: () => {
             toast.add({
                 type: "success",
                 title: "Email Verified",
@@ -63,15 +53,7 @@ export const useVerifyEmail = () => {
         },
          onError: (error) => {
   if (axios.isAxiosError(error)) {
-    console.log('code:', error.code);
-    console.log('config:', error.config);      // the request that was attempted — url, method, headers, baseURL
-    console.log('response:', error.response);  // undefined if the request never got a response at all
-    console.log('request:', error.request);    // the raw XHR/request object
     const message = error.response?.data?.message ?? error.message;
-    console.log('code:', error.code);
-    console.log('message:', error.message);
-    
-    console.log(message);
     toast.add({
       type: "error",
       title: "Verification Failed",
@@ -97,10 +79,9 @@ export const useLogin = () => {
   // const setAccessToken = useAuth((s) => s.setAccessToken);
     const { mutateAsync: loginUser, isPending, isError, isSuccess } = useMutation({
         mutationFn: login,
-        onSuccess: (data) => {
+        onSuccess: () => {
           useAuthStore.setAccessToken(data.token);
           useAuthStore.setIsAuthenticated(true);
-            console.log(data);
             toast.add({
                 type: "success",
                 title: "Login Successful",
@@ -110,15 +91,7 @@ export const useLogin = () => {
         },
          onError: (error) => {
   if (axios.isAxiosError(error)) {
-    console.log('code:', error.code);
-    console.log('config:', error.config);      // the request that was attempted — url, method, headers, baseURL
-    console.log('response:', error.response);  // undefined if the request never got a response at all
-    console.log('request:', error.request);    // the raw XHR/request object
     const message = error.response?.data?.message ?? error.message;
-    console.log('code:', error.code);
-    console.log('message:', error.message);
-    
-    console.log(message);
     toast.add({
       type: "error",
       title: "Login Failed",
@@ -143,9 +116,8 @@ export const useRequestPasswordReset = () => {
   // const setAccessToken = useAuth((s) => s.setAccessToken);
     const { mutateAsync: reqPasswordReset, isPending, isError, isSuccess } = useMutation({
         mutationFn: requestPasswordReset,
-        onSuccess: (data) => {
+        onSuccess: () => {
         // setAccessToken(data.token);
-            console.log(data);
             toast.add({
                 type: "success",
                 title: "Password Reset Requested",
@@ -154,15 +126,7 @@ export const useRequestPasswordReset = () => {
         },
          onError: (error) => {
   if (axios.isAxiosError(error)) {
-    console.log('code:', error.code);
-    console.log('config:', error.config);      // the request that was attempted — url, method, headers, baseURL
-    console.log('response:', error.response);  // undefined if the request never got a response at all
-    console.log('request:', error.request);    // the raw XHR/request object
     const message = error.response?.data?.message ?? error.message;
-    console.log('code:', error.code);
-    console.log('message:', error.message);
-    
-    console.log(message);
     toast.add({
       type: "error",
       title: "Password Reset Failed",
@@ -187,9 +151,8 @@ export const usePasswordReset = () => {
   // const setAccessToken = useAuth((s) => s.setAccessToken);
     const { mutateAsync: passwordReset, isPending } = useMutation({
         mutationFn: resetPassword,
-        onSuccess: (data) => {
+        onSuccess: () => {
         // setAccessToken(data.token);
-            console.log(data);
             toast.add({
                 type: "success",
                 title: "Password Reset Successful",
@@ -198,15 +161,7 @@ export const usePasswordReset = () => {
         },
          onError: (error) => {
   if (axios.isAxiosError(error)) {
-    console.log('code:', error.code);
-    console.log('config:', error.config);      // the request that was attempted — url, method, headers, baseURL
-    console.log('response:', error.response);  // undefined if the request never got a response at all
-    console.log('request:', error.request);    // the raw XHR/request object
     const message = error.response?.data?.message ?? error.message;
-    console.log('code:', error.code);
-    console.log('message:', error.message);
-    
-    console.log(message);
     toast.add({
       type: "error",
       title: "Password Reset Failed",

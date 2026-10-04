@@ -6,7 +6,6 @@ export const register = async(data:{name: string, email: string, password: strin
 }
 
 export const verify = async (data: {token:string}) => {
-    console.log(data)
     const request = await apiClient.post("/auth/verify", data);
     return request.data;
 }

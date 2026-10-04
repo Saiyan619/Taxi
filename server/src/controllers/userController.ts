@@ -17,7 +17,6 @@ export const findUserByEmail = async(email: string) => {
         let [user] = await db.select().from(users).where(eq(users.email, email))
         return user
     } catch (error) {
-        console.log(error)
     }
 }
 
@@ -34,7 +33,6 @@ export const findUserByEmail = async(email: string) => {
 //         // 2. Changed status from 201 to 200
 //         return res.status(200).json(user);
 //     } catch (error:any) {
-//        console.log(error)
 //         res.status(500).json({message: error.message})
 //     }
 // }

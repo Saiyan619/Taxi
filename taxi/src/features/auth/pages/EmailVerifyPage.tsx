@@ -31,7 +31,6 @@ const EmailVerifyPage = () => {
   };
 
   useEffect(() => {
-    console.log("Verification token:", token);
     runVerification();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, verifyEmail]);

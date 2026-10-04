@@ -60,9 +60,7 @@ const ResetPasswordPage = () => {
     if (!token) {
       throw new Error("Reset token is missing");
     }
-    console.log(token);
     passwordReset({password, token})
-    console.log("New password set:", password);
   };
 
   return (

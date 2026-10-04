@@ -50,9 +50,6 @@ export const aiTextConverter = async(req: Request, res: Response) => {
     result: content
     }).returning();
 
-    console.log("articulation has been created and stored!!");
-    console.log(response.choices[0].message.content);
-
     res.status(200).json({Generated_result: response.choices[0].message.content, articulation: articulation});
     }else{
         res.status(401).json({message: "this user is not authenticated/authorised to call this"})
@@ -69,7 +66,6 @@ export const aiTextConverter = async(req: Request, res: Response) => {
 export const getArticulations = async (req:Request, res: Response) => {
     try {
         const user = req.user;
-    console.log(`my user id: ${user.id}`);
     if (!user) {
         return res.status(403).json({message: "user doesnt exist to make this call!!"})
     }
@@ -164,7 +160,6 @@ export const deleteAllArticulations = async (req: Request, res: Response) => {
 //   messages: [{ role: 'user', content: 'Explain closures in one paragraph.' }]
 // })
 
-// console.log(response.choices[0].message.content)
 
 // The SDK automatically uses process.env.GEMINI_API_KEY
 // const ai = new GoogleGenAI();
@@ -184,5 +179,3 @@ export const deleteAllArticulations = async (req: Request, res: Response) => {
 //     res.status(500).json({ error: 'Failed to communicate with Gemini' });
 //   }
 // });
-
-// app.listen(3000, () => console.log('Backend running on port 3000'));

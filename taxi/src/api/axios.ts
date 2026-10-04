@@ -32,13 +32,11 @@ export const attemptRefresh = async (): Promise<{ status: number; accessToken: s
   }
   refreshPromise = (async () => {
     try {
-      console.log("refreshing auth tokens")
       const response = await axios.post<{ status: number; accessToken: string }>(
         `${API_BASE_URL}/auth/refresh`,
         {},
         { withCredentials: true },
       );
-      console.log(" Finished!! refreshing auth tokens")
       return response.data;
     } catch (error) {
       useAuth.getState().clearToken();
@@ -66,7 +64,6 @@ apiClient.interceptors.response.use(
       errConfig.is_retried = true;
 
       try {
-        console.log("Actually testing the auth refresh")
         const data = await attemptRefresh();
 
         if (data?.accessToken) {
@@ -80,7 +77,6 @@ apiClient.interceptors.response.use(
           return apiClient(errConfig);
         }
       } catch (refreshError) {
-        console.log("could not refresh so im sending you back to the login page")
         // commented this because:
         // window.location.href forces a full page reload/hard navigation — it throws away your entire SPA state and re-downloads everything, which is heavy-handed and defeats the point of using React Router
         // let ProtectedRoute — which is reactively watching that state — handle the actual navigation via React Router's <Navigate>, which is a soft client-side redirect.

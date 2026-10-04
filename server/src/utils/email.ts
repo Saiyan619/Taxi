@@ -10,7 +10,6 @@ const brevo = new BrevoClient({
  */
 export const sendVerificationEmail = async (email: string, token: string): Promise<void> => {
   const verificationLink = `http://localhost:5173/verify-email?token=${token}`;
-  console.log(token)
   try {
     // Directly invoke the transactionalEmails namespace on the client instance
     await brevo.transactionalEmails.sendTransacEmail({
@@ -33,7 +32,6 @@ export const sendVerificationEmail = async (email: string, token: string): Promi
       `,
     });
 
-    console.log(`Verification email sent successfully via Brevo to ${email}`);
   } catch (error) {
     console.error('Brevo Email failed:', error);
     // throw new Error('Email delivery failed');
@@ -46,7 +44,6 @@ export const sendVerificationEmail = async (email: string, token: string): Promi
  */
 export const sendRequestPassResetEmail = async (email: string, token: string): Promise<void> => {
   const verificationLink = `http://localhost:5173/reset-password/${token}`;
-  console.log(token)
   try {
     // Directly invoke the transactionalEmails namespace on the client instance
     await brevo.transactionalEmails.sendTransacEmail({
@@ -69,7 +66,6 @@ export const sendRequestPassResetEmail = async (email: string, token: string): P
       `,
     });
 
-    console.log(`Reset Password email sent successfully via Brevo to ${email}`);
   } catch (error) {
     console.error('Brevo Email failed:', error);
     // throw new Error('Email delivery failed');

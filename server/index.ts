@@ -11,7 +11,7 @@ let PORT = process.env.PORT;
 let app = express();
 
 app.use(cors({
-  origin: "http://localhost:5173", // your frontend's actual origin
+  origin: "http://localhost:5173",
   credentials: true,
 }));
 
@@ -21,7 +21,12 @@ app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/ai", AIRoutes);
 
-app.listen(PORT, () => {
-    console.log(`listening on the port:${PORT}`)
+app.get("/health", (_req, res) => {
+  try {
+    return res.status(200).json({ status: "ok", message: "API is healthy" });
+  } catch {
+    return res.status(500).json({ status: "fail", message: "API health check failed" });
+  }
 });
 
+app.listen(PORT);

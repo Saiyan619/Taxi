@@ -67,7 +67,6 @@ export const registerUser = async(req: Request, res: Response) => {
 
         res.status(201).json(user)
     } catch (error: any) {
-        // console.log(error)
         res.status(500).json({message: "Server failed"})
     }
 }
@@ -94,7 +93,6 @@ export const verifyEmail = async(req: Request, res: Response) => {
         }).where(eq(users.id, user.id)).returning({ id: users.id, email: users.email, verified: users.verified });
         res.status(200).json(verify);
     } catch (error) {
-        console.log(error)
         res.status(500).json()
     }
 }
@@ -125,8 +123,6 @@ export const loginUser = async(req: Request, res: Response) => {
         }).returning();
         let jwtToken = generateToken(user);
         let refreshJwtToken = generateRefreshToken(user, refreshTk.jti);
-        console.log(jwtToken)
-        console.log(refreshJwtToken)
         res.cookie("refreshToken", refreshJwtToken, {
     httpOnly: true,
     secure: true,
@@ -139,7 +135,6 @@ export const loginUser = async(req: Request, res: Response) => {
                         expiresIn: process.env.JWT_EXPIRES_IN,
                         refreshExpiresIn: process.env.REFRESH_JWT_EXPIRES_IN})
     } catch (error) {
-        console.log(error)
         res.status(500).json({message:"something went wrong"})
     }
 }
@@ -167,11 +162,9 @@ export const refreshToken = async(req: Request, res: Response) => {
             return res.status(403).json({message: "refresh_tokens deleted successfully, spotted token reuse and exploitation"});
         }
         if (new Date() > refreshTk.expiresAt) {
-            console.log("token has expired")
             return res.status(403).json({message: "this refresh token is expired; try logging in again"})
         }
         await db.delete(refreshTokens).where(eq(refreshTokens.jti, refreshTk.jti))
-        console.log("refreshtoken has been deleted succesfully");
         const newJti = crypto.randomUUID() as string
         const [newRefreshTk] = await db.insert(refreshTokens).values({
             jti: newJti,
@@ -181,10 +174,6 @@ export const refreshToken = async(req: Request, res: Response) => {
         }).returning();
         const newAccessToken = generateToken(user);
         let newRefreshJwtToken = generateRefreshToken(user, newRefreshTk.jti);
-        console.log("new access token below")
-        console.log(newAccessToken)
-        console.log("new refreshtoken below")
-        console.log(newRefreshJwtToken)
         res.cookie("refreshToken", newRefreshJwtToken, {
             httpOnly: true,
             secure: true,
@@ -195,7 +184,6 @@ export const refreshToken = async(req: Request, res: Response) => {
         return res.status(201).json({message: "accessToken restored successfully", accessToken: newAccessToken, expiresIn: process.env.JWT_EXPIRES_IN});
     
     } catch (error) {
-        console.log(error)
         res.status(500).json({message: "something went wrong with the token refresh and rotation"})        
     }
 }

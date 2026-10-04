@@ -115,7 +115,6 @@ function CopyButton({ text }: { text: string }) {
 
 const ArticulationsPage = () => {
   const { generatedData, isLoading, isError, refetch } = useGetGeneratedContent();
-  console.log("Generated Content Data:", generatedData);
   const { deleteContent, isPending: isDeleting } = useDeleteGeneratedContent();
   const { deleteAllContent, isPending: isDeletingAll } =
     useDeleteAllGeneratedContent();

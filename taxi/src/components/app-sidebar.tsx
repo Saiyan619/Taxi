@@ -104,7 +104,6 @@ export function AppSidebar() {
   const location = useLocation();
   const [activeWorkspace, setActiveWorkspace] = React.useState(workspaces[0]);
   const { generatedData } = useGetGeneratedContent();
-    // console.log("Generated Content Data:", generatedData);
 
   const isActive = (url: string) => location.pathname === url;
 
