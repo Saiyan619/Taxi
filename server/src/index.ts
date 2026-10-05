@@ -2,16 +2,20 @@ import dotenv from "dotenv";
 import express from "express"
 import cookieParser from "cookie-parser"
 import cors from "cors";
-import authRoutes from "./src/routes/authRoute"
-import userRoutes from "./src/routes/userRoute"
-import AIRoutes from "./src/routes/AIRoute"
+import authRoutes from "./routes/authRoute.js"
+import userRoutes from "./routes/userRoute.js"
+import AIRoutes from "./routes/AIRoute.js"
+
 dotenv.config();
+
 let PORT = process.env.PORT;
+let FRONTEND_URL = process.env.FRONTEND_URL;
 
 let app = express();
 
 app.use(cors({
-  origin: "http://localhost:5173",
+  // origin: "http://localhost:5173",
+  origin: FRONTEND_URL,
   credentials: true,
 }));
 
@@ -29,4 +33,4 @@ app.get("/health", (_req, res) => {
   }
 });
 
-app.listen(PORT);
+app.listen(Number(PORT), () => console.log(`Running on ${PORT}`));
