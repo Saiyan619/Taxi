@@ -8,14 +8,27 @@ import AIRoutes from "./routes/AIRoute.js"
 
 dotenv.config();
 
-let PORT = process.env.PORT;
-let FRONTEND_URL = process.env.FRONTEND_URL;
+const PORT = Number(process.env.PORT || 5000);
+const configuredFrontendUrls = (process.env.FRONTEND_URL || "")
+  .split(",")
+  .map((url) => url.trim())
+  .filter(Boolean);
+const allowedFrontendUrls = [
+  "http://localhost:5173",
+  "https://taxi-nine-pi.vercel.app",
+  ...configuredFrontendUrls,
+];
 
-let app = express();
+const app = express();
 
 app.use(cors({
-  // origin: "http://localhost:5173",
-  origin: FRONTEND_URL,
+  origin: (origin, callback) => {
+    if (!origin || allowedFrontendUrls.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Origin is not allowed by CORS"));
+  },
   credentials: true,
 }));
 
@@ -33,4 +46,4 @@ app.get("/health", (_req, res) => {
   }
 });
 
-app.listen(Number(PORT), () => console.log(`Running on ${PORT}`));
+app.listen(PORT);

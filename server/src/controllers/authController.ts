@@ -11,6 +11,14 @@ import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 import { generateRefreshToken, generateToken, getJwtExpiryMs } from "../utils/jwt.js";
 
+// Localhost needs regular cookies, but the deployed frontend and API are on
+// different sites, so production needs secure cross-site cookies instead.
+const useSecureCookies =
+    process.env.COOKIE_SECURE === "true" ||
+    process.env.NODE_ENV === "production" ||
+    process.env.RENDER === "true";
+const cookieSameSite = useSecureCookies ? "none" : "lax";
+
 const RegisterUserSchema = z.object({
     name: z.string().min(1, "Name is required"),
     email: z.email(),
@@ -125,8 +133,8 @@ export const loginUser = async(req: Request, res: Response) => {
         let refreshJwtToken = generateRefreshToken(user, refreshTk.jti);
         res.cookie("refreshToken", refreshJwtToken, {
     httpOnly: true,
-    secure: true,
-    sameSite: "strict",
+    secure: useSecureCookies,
+    sameSite: cookieSameSite,
     path: "/api/auth",
         maxAge: getJwtExpiryMs("REFRESH_JWT_EXPIRES_IN"),
   });
@@ -176,8 +184,8 @@ export const refreshToken = async(req: Request, res: Response) => {
         let newRefreshJwtToken = generateRefreshToken(user, newRefreshTk.jti);
         res.cookie("refreshToken", newRefreshJwtToken, {
             httpOnly: true,
-            secure: true,
-            sameSite: "strict",
+            secure: useSecureCookies,
+            sameSite: cookieSameSite,
             path: "/api/auth",
             maxAge: getJwtExpiryMs("REFRESH_JWT_EXPIRES_IN"),
         });
@@ -201,8 +209,8 @@ export const logout = async(req: Request, res: Response) => {
 
         res.clearCookie("refreshToken", {
             httpOnly: true,
-            secure: true,
-            sameSite: "strict",
+            secure: useSecureCookies,
+            sameSite: cookieSameSite,
             path: "/api/auth",
         });
         

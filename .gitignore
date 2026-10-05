@@ -6,6 +6,9 @@ server/node_modules/
 # Environment variables
 .env
 .env.*
+!.env.example
+!server/.env.example
+!taxi/.env.example
 
 # Build output
 dist/

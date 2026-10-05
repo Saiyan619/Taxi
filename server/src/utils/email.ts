@@ -4,12 +4,14 @@ import { BrevoClient } from '@getbrevo/brevo';
 const brevo = new BrevoClient({
   apiKey: process.env.BREVO_API_KEY || 'YOUR_BREVO_API_KEY_HERE',
 });
+const frontendUrl =
+  process.env.FRONTEND_URL?.split(",")[0]?.trim() || "http://localhost:5173";
 
 /**
  * Sends a verification email without needing a custom domain.
  */
 export const sendVerificationEmail = async (email: string, token: string): Promise<void> => {
-  const verificationLink = `http://localhost:5173/verify-email?token=${token}`;
+  const verificationLink = `${frontendUrl}/verify-email?token=${token}`;
   try {
     // Directly invoke the transactionalEmails namespace on the client instance
     await brevo.transactionalEmails.sendTransacEmail({
@@ -43,7 +45,7 @@ export const sendVerificationEmail = async (email: string, token: string): Promi
  * Sends a reuqest rest password email without needing a custom domain.
  */
 export const sendRequestPassResetEmail = async (email: string, token: string): Promise<void> => {
-  const verificationLink = `http://localhost:5173/reset-password/${token}`;
+  const verificationLink = `${frontendUrl}/reset-password/${token}`;
   try {
     // Directly invoke the transactionalEmails namespace on the client instance
     await brevo.transactionalEmails.sendTransacEmail({
