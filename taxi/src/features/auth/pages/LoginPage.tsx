@@ -169,6 +169,10 @@ const LoginPage = () => {
               <a href="#" className="text-primary hover:underline">
                 Create an account
               </a>
+              <Link to="/register" className="text-primary hover:underline">
+                                Create an account
+              </Link>
+              
               <Link to="/home" className="text-primary hover:underline">
                                 Go home
               </Link>
