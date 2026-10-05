@@ -1,4 +1,3 @@
-import * as React from "react";
 import { Outlet } from "react-router";
 import { Separator } from "@/components/ui/separator";
 import {

@@ -20,7 +20,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Sparkles, Plus, Loader2 } from "lucide-react";
-import { useAuth } from "@/stores/authStore";
+// import { useAuth } from "@/stores/authStore";
 import { useGetMe } from "../hooks/userHook";
 import { useGenerateContent } from "@/features/ai/hooks/aiHook";
 import SpeechToTxt from "@/features/ai/components/SpeechToTxt";
@@ -124,7 +124,7 @@ export default function Home() {
 
   const allTones = [...tonePresets, ...customTones];
 
-  const token = useAuth((state) => state.accessTk);
+  // const token = useAuth((state) => state.accessTk);
   const { data: user } = useGetMe();
 
   const generateAIContent = () => {

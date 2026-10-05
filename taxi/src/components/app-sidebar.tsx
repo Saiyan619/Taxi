@@ -6,10 +6,10 @@ import {
   ChevronsUpDown,
   LayoutDashboard,
   Inbox,
-  FolderKanban,
-  CheckSquare,
-  CalendarDays,
-  BarChart3,
+  // FolderKanban,
+  // CheckSquare,
+  // CalendarDays,
+  // BarChart3,
   Settings,
   HelpCircle,
   MessageSquare,
@@ -19,7 +19,7 @@ import {
   User,
   CreditCard,
   Bell,
-  ChevronRight,
+  // ChevronRight,
   Building2,
 } from "lucide-react";
 
@@ -35,18 +35,18 @@ import {
   SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
+  // SidebarMenuSub,
+  // SidebarMenuSubButton,
+  // SidebarMenuSubItem,
   SidebarRail,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+// import {
+//   Collapsible,
+//   CollapsibleContent,
+//   CollapsibleTrigger,
+// } from "@/components/ui/collapsible";
 
 import {
   DropdownMenu,
