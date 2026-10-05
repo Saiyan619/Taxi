@@ -6,7 +6,7 @@ import { toast } from "@/components/ui/toast";
 export const useGenerateContent = () => {
     const {mutateAsync: generate, isPending, data} = useMutation({
         mutationFn: generateContent,
-         onSuccess: (data) => {
+         onSuccess: () => {
             toast.add({
                 type: "success",
                 title: "Context Generation Successful",

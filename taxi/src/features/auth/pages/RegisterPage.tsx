@@ -10,7 +10,7 @@ import { useRegister } from "../hooks/authHook";
 const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [agreed, setAgreed] = useState(false);
-  const { registerUser, isPending, isError} = useRegister();
+  const { registerUser, isPending} = useRegister();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

@@ -79,7 +79,7 @@ export const useLogin = () => {
   // const setAccessToken = useAuth((s) => s.setAccessToken);
     const { mutateAsync: loginUser, isPending, isError, isSuccess } = useMutation({
         mutationFn: login,
-        onSuccess: () => {
+        onSuccess: (data) => {
           useAuthStore.setAccessToken(data.token);
           useAuthStore.setIsAuthenticated(true);
             toast.add({
