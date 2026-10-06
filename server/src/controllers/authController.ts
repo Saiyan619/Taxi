@@ -143,7 +143,8 @@ export const loginUser = async(req: Request, res: Response) => {
                         expiresIn: process.env.JWT_EXPIRES_IN,
                         refreshExpiresIn: process.env.REFRESH_JWT_EXPIRES_IN})
     } catch (error) {
-        res.status(500).json({message:"something went wrong", error: error})
+        console.error("LOGIN ERROR:", error);
+        res.status(500).json({message:"something went wrong"})
     }
 }
 
