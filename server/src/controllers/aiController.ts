@@ -57,7 +57,8 @@ export const aiTextConverter = async(req: Request, res: Response) => {
 
     
     } catch (error) {
-        res.status(500).json({message: "something went wrong", error: error})
+        console.log(error)
+        res.status(500).json({message: "something went wrong"})
     }
 
 }
