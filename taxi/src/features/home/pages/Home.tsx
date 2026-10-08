@@ -19,7 +19,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { Sparkles, Plus, Loader2 } from "lucide-react";
+import { Check, Copy, Sparkles, Plus, Loader2 } from "lucide-react";
 // import { useAuth } from "@/stores/authStore";
 import { useGetMe } from "../hooks/userHook";
 import { useGenerateContent } from "@/features/ai/hooks/aiHook";
@@ -112,6 +112,8 @@ export default function Home() {
   const [draft, setDraft] = React.useState("");
   const [tone, setTone] = React.useState<string[]>(["job-outreach"]);
   const [result, setResult] = React.useState<string | null>(null);
+  const [isCopied, setIsCopied] = React.useState(false);
+  const [copyError, setCopyError] = React.useState<string | null>(null);
   const { generate, Generated_result, isPending } = useGenerateContent();
 
   // Custom, user-defined tones — kept separate from the presets so we never
@@ -129,6 +131,19 @@ export default function Home() {
 
   const generateAIContent = () => {
     generate({ raw_text: draft, tone: tone[0] });
+  };
+
+  const copyResult = async () => {
+    setCopyError(null);
+
+    try {
+      await navigator.clipboard.writeText(result ?? "");
+      setIsCopied(true);
+      window.setTimeout(() => setIsCopied(false), 1500);
+    } catch (error) {
+      console.error("Failed to copy rewritten result.", error);
+      setCopyError("Unable to copy. Please select the text and copy it manually.");
+    }
   };
 
   // `data` only updates once the mutation resolves, so sync `result` off of
@@ -305,12 +320,33 @@ export default function Home() {
       {/* Generated result */}
       {result && (
         <div className="rounded-2xl border border-primary/30 bg-card p-5 shadow-sm">
-          <span className="text-xs font-medium uppercase tracking-wide text-primary">
-            Rewritten
-          </span>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs font-medium uppercase tracking-wide text-primary">
+              Rewritten
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={copyResult}
+              aria-label={isCopied ? "Copied rewritten result" : "Copy rewritten result"}
+              className="gap-1.5 text-muted-foreground"
+            >
+              {isCopied ? (
+                <Check className="size-3.5" />
+              ) : (
+                <Copy className="size-3.5" />
+              )}
+              {isCopied ? "Copied" : "Copy"}
+            </Button>
+          </div>
           <p className="mt-3 min-h-56 whitespace-pre-wrap text-sm leading-relaxed text-foreground">
             {result}
           </p>
+          {copyError && (
+            <p role="alert" className="mt-2 text-xs text-destructive">
+              {copyError}
+            </p>
+          )}
         </div>
       )}
     </div>
