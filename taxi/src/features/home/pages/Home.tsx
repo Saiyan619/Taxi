@@ -93,10 +93,10 @@ const tonePresets = [
   },
 ];
 
-const PLACEHOLDER = `hey how are you doing ive been trying to talk to you now but i can't because it seems you're busy
-i just wanted to say i love your works and also i noticed that your were in search for a frontend dev, i just wanted to say i think im the man for the job
-please i need this job and ill really appreciate if you just give my resume a chance to be looked at
-and i promise to deliver if i do get this job, thank you`;
+const PLACEHOLDER = `hey so about the project and friday
+im not sure we can actually do friday because stuff is still breaking and we havent tested all of it
+we said friday before but i dont think its ready yet and pushing it out like that could be bad
+maybe tuesday instead? gives us a few more days to fix things and test properly idk what do you think`;
 
 // Turns "Gen Z Bestie" into "gen-z-bestie" so it's a safe, unique-ish value
 // for the toggle group / backend without you having to type a slug yourself.
