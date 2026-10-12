@@ -1,4 +1,5 @@
 import apiClient from "@/api/axios"
+import { data } from "react-router";
 
 export const register = async(data:{name: string, email: string, password: string}) => {
     const request = await apiClient.post("/auth/signup", data);
@@ -14,6 +15,11 @@ export const login = async (data: {email: string, password: string}) => {
     const response = await apiClient.post("/auth/login", data);
 
     return response.data;
+}
+
+export const logout = async () => {
+    const response = await apiClient.post("/auth/logout", data);
+    return response;
 }
 
 export const requestPasswordReset = async (data: {email: string}) => {

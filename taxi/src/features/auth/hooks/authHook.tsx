@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { login, register, requestPasswordReset, resetPassword, verify } from "../api/authApi"
+import { login, logout, register, requestPasswordReset, resetPassword, verify } from "../api/authApi"
 import { toast } from "@/components/ui/toast";
 import axios from "axios";
 import { useAuth } from "@/stores/authStore";
@@ -111,6 +111,44 @@ export const useLogin = () => {
 
     return{loginUser, isPending, isError, isSuccess}
 }
+
+export const useLogout = () => {
+  const navigate = useNavigate();
+
+  const { mutateAsync: logoutUser, isPending, isError } = useMutation({
+    mutationFn: logout,
+    onSuccess: () => {
+      useAuthStore.clearToken();
+      useAuthStore.setIsAuthenticated(false);
+      toast.add({
+        type: "success",
+        title: "Logout Successful",
+        description: `You have successfully logged out.`,
+      });
+      navigate("/login");
+    },
+    onError: (error) => {
+      if (axios.isAxiosError(error)) {
+        const message = error.response?.data?.message ?? error.message;
+        toast.add({
+          type: "error",
+          title: "Logout Failed",
+          description: `Failed to logout: ${message}`,
+          priority: "high",
+        });
+      } else {
+        toast.add({
+          type: "error",
+          title: "Logout Failed",
+          description: "Something went wrong",
+          priority: "high",
+        });
+      }
+    }
+  });
+
+  return { logoutUser, isPending, isError };
+};
 
 export const useRequestPasswordReset = () => {
   // const setAccessToken = useAuth((s) => s.setAccessToken);

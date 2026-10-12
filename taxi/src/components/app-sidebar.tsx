@@ -16,6 +16,7 @@ import {
   Plus,
   Search,
   LogOut,
+  Loader2,
   User,
   CreditCard,
   Bell,
@@ -59,6 +60,17 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useGetGeneratedContent } from "@/features/ai/hooks/aiHook";
+import { useLogout } from "@/features/auth/hooks/authHook";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // ---------------------------------------------------------------------------
 // Static data — swap these for real data from your auth/session + API layer.
@@ -103,7 +115,9 @@ const currentUser = {
 export function AppSidebar() {
   const location = useLocation();
   const [activeWorkspace, setActiveWorkspace] = React.useState(workspaces[0]);
+  const [logoutDialogOpen, setLogoutDialogOpen] = React.useState(false);
   const { generatedData } = useGetGeneratedContent();
+  const { logoutUser, isPending: isLoggingOut } = useLogout();
 
   const isActive = (url: string) => location.pathname === url;
 
@@ -374,7 +388,10 @@ export function AppSidebar() {
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="gap-2 text-destructive focus:text-destructive">
+                <DropdownMenuItem
+                  className="gap-2 text-destructive focus:text-destructive"
+                  onClick={() => setLogoutDialogOpen(true)}
+                >
                   <LogOut className="size-4" />
                   Log out
                 </DropdownMenuItem>
@@ -383,6 +400,38 @@ export function AppSidebar() {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
+
+      <AlertDialog
+        open={logoutDialogOpen}
+        onOpenChange={(open) => {
+          if (!isLoggingOut) {
+            setLogoutDialogOpen(open);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Log out of Taxi?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to log out? You will need to sign in
+              again to access your account.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isLoggingOut}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => void logoutUser()}
+              disabled={isLoggingOut}
+              className="gap-1.5 bg-destructive text-white hover:bg-destructive/90"
+            >
+              {isLoggingOut && <Loader2 className="size-4 animate-spin" />}
+              {isLoggingOut ? "Logging out..." : "Log out"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <SidebarRail />
     </Sidebar>

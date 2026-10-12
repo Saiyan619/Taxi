@@ -9,14 +9,22 @@ import { useRegister } from "../hooks/authHook";
 
 const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const { registerUser, isPending} = useRegister();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const passwordsDoNotMatch =
+    confirmPassword.length > 0 && password !== confirmPassword;
 
   const handleRegistration =  (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (passwordsDoNotMatch) {
+      return;
+    }
+
     const payload = {
       name: username,
       email: email,
@@ -197,6 +205,50 @@ const RegisterPage = () => {
                 </div>
               </div>
 
+              <div className="space-y-1.5">
+                <Label htmlFor="confirm-password" className="text-xs text-muted-foreground">
+                  Confirm password
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="confirm-password"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Re-enter your password"
+                    required
+                    minLength={6}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    aria-invalid={passwordsDoNotMatch}
+                    className={`bg-background text-foreground placeholder:text-muted-foreground h-11 pr-10 ${
+                      passwordsDoNotMatch
+                        ? "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/20"
+                        : "border-border"
+                    }`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label={
+                      showConfirmPassword
+                        ? "Hide confirm password"
+                        : "Show confirm password"
+                    }
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+                {passwordsDoNotMatch && (
+                  <p className="text-xs text-destructive" role="alert">
+                    Passwords do not match.
+                  </p>
+                )}
+              </div>
+
               <div className="flex items-start gap-2 pt-1">
                 <Checkbox
                   id="terms"
@@ -224,7 +276,7 @@ const RegisterPage = () => {
                 Signing Up...
               </Button> : <Button
                 type="submit"
-                disabled={!agreed}
+                disabled={!agreed || passwordsDoNotMatch}
                 className="w-full h-11 bg-primary text-primary-foreground hover:bg-primary/90 font-medium disabled:opacity-50"
               >
                 Get Started Free →
