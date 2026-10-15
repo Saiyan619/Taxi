@@ -179,7 +179,7 @@ export default function Home() {
           What's on your mind, {user?.user?.name || "User"}?
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Dump your raw thoughts below. Taxi will rewrite them in the tone
+          Dump your raw thoughts below. Taxci will rewrite them in the tone
           you pick.
         </p>
       </div>

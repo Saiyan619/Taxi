@@ -6,6 +6,10 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { AppSidebar } from "./app-sidebar";
+import { Button } from "@/components/ui/button";
+import { Sparkles } from "lucide-react";
+import { UpgradeDialog } from "@/features/billing/components/UpgradeDialog";
+import { useState } from "react";
 
 // Wrap your routed pages with this layout, e.g.:
 //   <Route element={<AppLayout />}>
@@ -14,6 +18,8 @@ import { AppSidebar } from "./app-sidebar";
 //   </Route>
 
 export function AppLayout() {
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -21,12 +27,22 @@ export function AppLayout() {
         <header className="flex h-14 shrink-0 items-center gap-2 border-b border-sidebar-border px-4">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
-          {/* Drop breadcrumbs, page title, or actions here */}
+          <div className="ml-auto">
+            <Button
+              size="sm"
+              className="gap-2 rounded-full px-4"
+              onClick={() => setUpgradeOpen(true)}
+            >
+              <Sparkles className="size-4" />
+              Upgrade
+            </Button>
+          </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4">
           <Outlet />
         </div>
       </SidebarInset>
+      <UpgradeDialog open={upgradeOpen} onOpenChange={setUpgradeOpen} />
     </SidebarProvider>
   );
 }

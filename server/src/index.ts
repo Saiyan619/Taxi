@@ -5,6 +5,7 @@ import cors from "cors";
 import authRoutes from "./routes/authRoute.js"
 import userRoutes from "./routes/userRoute.js"
 import AIRoutes from "./routes/AIRoute.js"
+import paymentRoutes from "./routes/paymentRoute.js"
 
 dotenv.config();
 
@@ -15,7 +16,6 @@ const configuredFrontendUrls = (process.env.FRONTEND_URL || "")
   .filter(Boolean);
 const allowedFrontendUrls = [
   "http://localhost:5173",
-  "https://taxi-nine-pi.vercel.app",
   ...configuredFrontendUrls,
 ];
 
@@ -32,11 +32,13 @@ app.use(cors({
   credentials: true,
 }));
 
+app.use("/api/payment/webhook", express.raw({ type: "application/json" }));
 app.use(express.json());
 app.use(cookieParser())
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/ai", AIRoutes);
+app.use("/api/payment", paymentRoutes);
 
 app.get("/health", (_req, res) => {
   try {

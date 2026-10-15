@@ -77,7 +77,7 @@ import {
 // ---------------------------------------------------------------------------
 
 const workspaces = [
-  { name: "Taxi Inc.", plan: "Pro" },
+  { name: "Taxci Inc.", plan: "Pro" },
   { name: "Personal", plan: "Free" },
 ];
 

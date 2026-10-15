@@ -1,4 +1,4 @@
-import { boolean, index, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
+import { boolean, index, jsonb, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
 
 export const users = pgTable('users', {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -52,4 +52,38 @@ export const articulations = pgTable('articulations', {
   result: text("result").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true,}).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true,}).defaultNow().notNull(),
+});
+
+
+export const billingSubscriptions = pgTable("billing_subscriptions", {
+  userId: uuid("user_id").primaryKey().references(() => users.id),
+  bachsCustomerId: varchar("bachs_customer_id", { length: 64 }).notNull(),
+  bachsSubscriptionId: varchar("bachs_subscription_id", { length: 64 }).notNull().unique(),
+  productId: varchar("product_id", { length: 64 }).notNull(),
+  status: varchar("status", { length: 32 }).notNull(),
+  currentPeriodEnd: timestamp("current_period_end", { withTimezone: true }),
+  cancelAtPeriodEnd: boolean("cancel_at_period_end").notNull().default(false),
+  state: jsonb("state").notNull(),
+  eventCreatedAt: timestamp("event_created_at", { withTimezone: true }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [
+  uniqueIndex("billing_customer_idx").on(table.bachsCustomerId),
+]);
+
+export const billingWebhookEvents = pgTable("billing_webhook_events", {
+  id: varchar("id", { length: 128 }).primaryKey(),
+  type: varchar("type", { length: 128 }).notNull(),
+  eventCreatedAt: timestamp("event_created_at", { withTimezone: true }).notNull(),
+  processedAt: timestamp("processed_at", { withTimezone: true }),
+});
+
+export const billingOperations = pgTable("billing_operations", {
+  idempotencyKey: varchar("idempotency_key", { length: 128 }).primaryKey(),
+  userId: uuid("user_id").notNull().references(() => users.id),
+  operation: varchar("operation", { length: 32 }).notNull(),
+  plan: varchar("plan", { length: 64 }).notNull(),
+  checkoutId: varchar("checkout_id", { length: 64 }),
+  checkoutUrl: text("checkout_url"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
