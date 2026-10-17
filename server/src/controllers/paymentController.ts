@@ -12,7 +12,7 @@ const getPlanProduct = (plan: string) => ({
   daily: process.env.BACHS_PRO_DAILY,
   monthly: process.env.BACHS_PRO_MONTHLY,
 }[plan]);
-
+ 
 type BachsSubscription = {
   subscription_id: string;
   customer?: { customer_id?: string };
@@ -118,17 +118,38 @@ const verifySignature = (rawBody: Buffer, header: string | undefined, secret: st
   });
 };
 
+
+// The whole webook function in one picture
+
+// Keep the raw message untouched.
+// Check the signature to prove it’s from Bachs.
+// Read the message into an object.
+// Open a transaction (all or nothing).
+// Check the logbook so duplicates are skipped.
+// Find which user it’s about using metadata.
+// Save the subscription, but only if the event is newer than what’s stored.
+// Mark the event as processed.
+// Reply 200 if all good, 500 if something broke.
 export const webhook = async (req: Request, res: Response) => {
   try {
+    // keep raw message recieved from bach just as it came in its initial form to avoid data tampering
     const rawBody = Buffer.isBuffer(req.body) ? req.body : Buffer.from("");
+    // Verify signature; Bachs attaches a secret code to the header which we were provided(BACHS_WEBHOOK_SECRET), also check ours(BACHS_WEBHOOK_SECRET) by also unscrambling
+    // and if we unscramble both and we come up with the same secret then we can verify that its legit and untampered or fake
     if (!verifySignature(rawBody, req.header("X-Bachs-Signature-V2"), requireConfig("BACHS_WEBHOOK_SECRET"))) {
       return res.status(400).send("Invalid signature");
     }
+    // After verification of no tampering or fake signature; arrange raw body into a readable Typescrpt object 
     const event = JSON.parse(rawBody.toString()) as { id: string; type: string; created_at: string; data: BachsSubscription };
+    // Complete Transaction: which basically means every code running in "db.transaction" cannot be half started or half finished
+    // in other words with db.transaction if the code in any part were to fail or crash its retracts it
+    // e.g instead of the code crashing and the money stuck or vanishes it cancels the entire code cycle and starts again
     await db.transaction(async (tx) => {
+      // im keeping a legder of list of recorded events and returning nothing if record already exist thus, implementing idempotency
       const inserted = await tx.insert(billingWebhookEvents).values({
         id: event.id, type: event.type, eventCreatedAt: new Date(event.created_at),
       }).onConflictDoNothing().returning({ id: billingWebhookEvents.id });
+      // inserted would return an array[] if nothng exist, if so, stop the code.
       if (inserted.length === 0) return;
 
       if (["customer.subscription.created", "customer.subscription.updated", "customer.subscription.deleted"].includes(event.type)) {
@@ -137,6 +158,7 @@ export const webhook = async (req: Request, res: Response) => {
         const customerId = sub.customer?.customer_id || sub.customer_id;
         if (!userId || !customerId) throw new Error("Subscription event lacks user_id or customer_id");
         const eventDate = new Date(event.created_at);
+        // Insert if data doesnt else update it
         await tx.insert(billingSubscriptions).values({
           userId, bachsCustomerId: customerId, bachsSubscriptionId: sub.subscription_id, productId: sub.product_id,
           status: sub.status, currentPeriodEnd: sub.current_period_end ? new Date(sub.current_period_end) : null,
@@ -148,6 +170,11 @@ export const webhook = async (req: Request, res: Response) => {
             status: sub.status, currentPeriodEnd: sub.current_period_end ? new Date(sub.current_period_end) : null,
             cancelAtPeriodEnd: sub.cancel_at_period_end === true, state: sub, eventCreatedAt: eventDate, updatedAt: new Date(),
           },
+          // always trust the most recent real action, and never let a late-arriving old message undo it.
+          // this would help avoud situations the services is bad and a user probaly canceled the subscription by mistake
+          // and then the resubscribed, without this line of code, if the cancel function is to land later after the resubscribed do to bad service
+          // the final action would be to cancel even if the user want to actually resubscribe
+          // this line of could is the last line of defence to avoid that
           where: lt(billingSubscriptions.eventCreatedAt, eventDate),
         });
       }
