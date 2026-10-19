@@ -1,19 +1,16 @@
-import dotenv from "dotenv";
 import express from "express"
 import cookieParser from "cookie-parser"
 import cors from "cors";
+import { allowedFrontendUrls as configuredFrontendUrls } from "./config/env.js";
 import authRoutes from "./routes/authRoute.js"
 import userRoutes from "./routes/userRoute.js"
 import AIRoutes from "./routes/AIRoute.js"
 import paymentRoutes from "./routes/paymentRoute.js"
 
-dotenv.config();
-
 const PORT = Number(process.env.PORT || 5000);
-const configuredFrontendUrls = (process.env.FRONTEND_URL || "")
-  .split(",")
-  .map((url) => url.trim())
-  .filter(Boolean);
+
+// Always permit the local Vite frontend for development. The validated
+// configured origins are added for production or other trusted deployments.
 const allowedFrontendUrls = [
   "http://localhost:5173",
   ...configuredFrontendUrls,
@@ -23,6 +20,8 @@ const app = express();
 
 app.use(cors({
   origin: (origin, callback) => {
+    // Requests without an Origin header are commonly server-to-server calls,
+    // so they are allowed while browser origins are restricted to this list.
     if (!origin || allowedFrontendUrls.includes(origin)) {
       return callback(null, true);
     }

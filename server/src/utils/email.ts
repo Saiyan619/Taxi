@@ -1,12 +1,10 @@
 import { BrevoClient } from '@getbrevo/brevo';
+import { frontendUrl } from '../config/env.js';
 
 // Initialize the Brevo Client using the modern constructor syntax
 const brevo = new BrevoClient({
   apiKey: process.env.BREVO_API_KEY || 'YOUR_BREVO_API_KEY_HERE',
 });
-const frontendUrl =
-  process.env.FRONTEND_URL?.split(",")[0]?.trim() || "http://localhost:5173";
-
 /**
  * Sends a verification email without needing a custom domain.
  */

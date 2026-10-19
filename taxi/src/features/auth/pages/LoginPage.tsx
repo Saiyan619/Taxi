@@ -50,6 +50,7 @@ const LoginPage = () => {
             </span>
           </h1>
 
+
           <p className="mt-4 text-sm text-muted-foreground leading-relaxed max-w-md">
             Speak, scribble, or dump messy bullet points. Taxi rewrites
             your rough drafts into polished, natural prose—preserving
@@ -164,17 +165,25 @@ const LoginPage = () => {
               Sign in to Taxi →
             </Button>}
 
-            <p className="text-center text-xs text-muted-foreground pt-1">
+            <div className="flex align-center justify-center gap-2 mt-4">
+              <div className="flex">
+                 <p className="text-center text-xs text-muted-foreground pt-1">
               New to Taxi?{" "}
-             
-              <Link to="/register" className="text-primary hover:underline">
-                                Create an account
+            </p>
+             <Link to="/register" className="text-primary hover:underline">    
+                                <p className="text-primary text-center text-xs pt-1">
+              Create an account
+            </p>
               </Link>
               
-              <Link to="/home" className="text-primary hover:underline">
-                                Go home
-              </Link>
+              </div>
+              <Link to="/home" className="text-primary text-xs hover:underline">
+                                <p className="text-primary text-center text-xs pt-1">
+              Go home
             </p>
+              </Link>
+            </div>
+           
           </form>
         </div>
       </div>
