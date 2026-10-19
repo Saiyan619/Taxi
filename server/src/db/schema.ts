@@ -1,4 +1,4 @@
-import { boolean, index, jsonb, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
+import { boolean, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
 
 export const users = pgTable('users', {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -12,8 +12,14 @@ export const users = pgTable('users', {
   updated_at: timestamp("updated_at", {withTimezone: true}).defaultNow()
 }, (table) => [
   index("token_idx").on(table.token),
-  uniqueIndex("name_idx").on(table.name)
+  uniqueIndex("name_idx").on(table.name),
 ]);
+
+export const articulationCount = pgTable('articulation_count', {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().unique().references(() => users.id),
+  generationCount: integer("generation_count").default(0).notNull()
+});
 
 // Work on this later!!:
 // add a revoked_at

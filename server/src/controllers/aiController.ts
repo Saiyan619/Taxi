@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 import OpenAI from 'openai'
 import z from "zod";
 import { db } from "../db/db.js";
-import { articulations } from "../db/schema.js";
-import { and, eq } from "drizzle-orm";
+import { articulationCount, articulations } from "../db/schema.js";
+import { and, eq, sql } from "drizzle-orm";
 import { buildMessages } from "../utils/prompt.js";
 
 const promptSchema = z.object({
@@ -50,12 +50,32 @@ export const aiTextConverter = async(req: Request, res: Response) => {
     result: content
     }).returning();
 
+    if (articulation) {
+        const [articleCount] = await db
+  .insert(articulationCount)
+  .values({
+    userId: user.id,
+    generationCount: 1,     // first generation if no row exists yet
+  })
+//   to avoid race conditions, making use of the set function to ensure 
+// it's atomic(if two action were to run/save at the exact same time, 
+// postgress makes sure they work by saving one while making the other stay 
+// in line on its done saving the first then saves the second)
+  .onConflictDoUpdate({
+    target: articulationCount.userId,
+    set: {
+      generationCount: sql`${articulationCount.generationCount} + 1`,
+    },
+  })
+  .returning();
+  console.log("new articulation add to count")
+    }
+
     res.status(200).json({Generated_result: response.choices[0].message.content, articulation: articulation});
     }else{
         res.status(401).json({message: "this user is not authenticated/authorised to call this"})
     }
 
-    
     } catch (error) {
         console.log(error)
         res.status(500).json({message: "something went wrong"})
