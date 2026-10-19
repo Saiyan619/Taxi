@@ -8,7 +8,8 @@ const apiUrl = () => process.env.BACHS_API_URL || "https://sandbox-api.bachs.io"
 const accessStatuses = new Set(["trialing", "active", "past_due"]);
 const getPlanProduct = (plan: string) => ({
   pro: process.env.BACHS_PRO_MONTHLY,
-  ultra: process.env.BACHS_ULTRA_MONTHLY,
+  // ultra: process.env.BACHS_ULTRA_MONTHLY,
+  ultra: process.env.BACHS_ULTRA_DAILY,
   daily: process.env.BACHS_PRO_DAILY,
   monthly: process.env.BACHS_PRO_MONTHLY,
 }[plan]);
@@ -46,22 +47,36 @@ async function bachsPost(path: string, body: object, idempotencyKey: string) {
   return JSON.parse(responseBody) as Record<string, unknown>;
 }
 
+// Next thing to work on would be to make 
+// limit free users and and enable paid users to better
+//  features depending on the tier
+
+
 export const checkout = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id as string | undefined;
     const plan = typeof req.body?.plan === "string" ? req.body.plan : "";
+    const attemptId = typeof req.body?.attemptId === "string" ? req.body.attemptId : "";
     const productId = getPlanProduct(plan);
     if (!userId) return res.status(401).json({ message: "Authentication required" });
     if (!productId) return res.status(400).json({ message: "Unknown plan" });
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(attemptId)) {
+      return res.status(400).json({ message: "A valid checkout attempt ID is required" });
+    }
 
     const [existing] = await db.select().from(billingSubscriptions).where(eq(billingSubscriptions.userId, userId));
     if (existing && accessStatuses.has(existing.status)) {
+      console.log("=====================subscription is already active==================")
       return res.status(409).json({ message: "Subscription already active", manageBilling: true });
     }
+    
     const [user] = await db.select({ email: users.email, name: users.name }).from(users).where(eq(users.id, userId));
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    const idempotencyKey = `checkout_${userId}_${plan}`;
+    // Each deliberate checkout click gets a new attempt ID. Retries of that
+    // same request reuse this key, while a later click cannot reuse an expired
+    // BACHS checkout URL from an earlier attempt.
+    const idempotencyKey = `checkout_${userId}_${plan}_${attemptId}`;
     const [operation] = await db.insert(billingOperations).values({ idempotencyKey, userId, operation: "checkout", plan }).onConflictDoNothing().returning();
     if (!operation) {
       const [savedOperation] = await db.select().from(billingOperations).where(eq(billingOperations.idempotencyKey, idempotencyKey));
@@ -119,7 +134,7 @@ const verifySignature = (rawBody: Buffer, header: string | undefined, secret: st
 };
 
 
-// The whole webook function in one picture
+// The whole webook function flow in one picture
 
 // Keep the raw message untouched.
 // Check the signature to prove it’s from Bachs.
