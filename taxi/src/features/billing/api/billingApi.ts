@@ -16,8 +16,11 @@ export const getBillingStatus = async () => {
   return response.data;
 };
 
-export const createCheckout = async (plan: BillingPlan) => {
-  const response = await apiClient.post<{ checkout_url: string }>("/payment/checkout", { plan });
+export const createCheckout = async (plan: BillingPlan, attemptId: string) => {
+  const response = await apiClient.post<{ checkout_url: string }>("/payment/checkout", {
+    plan,
+    attemptId,
+  });
   return response.data;
 };
 

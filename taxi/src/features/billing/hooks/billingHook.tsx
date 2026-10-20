@@ -39,7 +39,8 @@ export const useBillingStatus = () => {
 export const useCreateCheckout = () => {
   const queryClient = useQueryClient();
   const mutation = useMutation({
-    mutationFn: (plan: BillingPlan) => createCheckout(plan),
+    mutationFn: ({ plan, attemptId }: { plan: BillingPlan; attemptId: string }) =>
+      createCheckout(plan, attemptId),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: billingStatusKey });
       window.location.assign(data.checkout_url);

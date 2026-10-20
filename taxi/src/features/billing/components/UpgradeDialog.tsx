@@ -31,7 +31,7 @@ const plans: Array<{
   {
     id: "pro",
     name: "Pro",
-    price: "$20",
+    price: "$10",
     description: "For consistent everyday writing.",
     features: ["50 rewrites per month", "All writing tones", "Saved rewrite history"],
     featured: true,
@@ -57,7 +57,9 @@ export function UpgradeDialog({ open, onOpenChange }: UpgradeDialogProps) {
 
   const choosePlan = async (plan: BillingPlan) => {
     setSelectedPlan(plan);
-    await checkout(plan);
+    // A new click represents a new checkout attempt. The same ID remains
+    // attached to retries of this request for idempotent BACHS behavior.
+    await checkout({ plan, attemptId: crypto.randomUUID() });
   };
 
   return (

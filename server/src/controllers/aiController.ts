@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import OpenAI from 'openai'
 import z from "zod";
 import { db } from "../db/db.js";
-import { articulationCount, articulations } from "../db/schema.js";
+import { articulationCount, articulations, billingOperations, billingSubscriptions } from "../db/schema.js";
 import { and, eq, sql } from "drizzle-orm";
 import { buildMessages } from "../utils/prompt.js";
 
@@ -10,6 +10,11 @@ const promptSchema = z.object({
     raw_text: z.string().min(6, 'prompt must be at least 6 characters long').max(2000, 'prompt must be at max 2000 characters long'),
     tone: z.string()
 })
+
+const LIMITS = { free: 1, pro: 2, ultra: 3 };
+
+
+
 
 export const aiTextConverter = async(req: Request, res: Response) => {
     try {
@@ -20,7 +25,27 @@ export const aiTextConverter = async(req: Request, res: Response) => {
         const user = req.user;
         
     if (user) {
-        const client = new OpenAI({
+        const [userGenerationCount] = await db.select().from(articulationCount).where(eq(articulationCount.userId, user.id));
+
+        const genCount = userGenerationCount?.generationCount ?? 0;
+        console.log(`generationCount is ${genCount}`);
+
+        const [userBillSub] = await db.select().from(billingSubscriptions).where(eq(billingSubscriptions.userId, user.id));
+
+        const [userBillOperation] = await db.select().from(billingOperations).where(eq(billingOperations.userId, user.id));
+        
+        let tier = "free";
+
+       if (userBillSub?.status === "active") {
+        tier = userBillOperation?.plan ?? "free"; // "pro" or "ultra"
+        }
+        const limit = (LIMITS as any)[tier] ?? LIMITS.free;
+        if (genCount >= limit) {
+            return res.status(403).json({ message: "Limit reached, upgrade your plan" });
+        }
+
+        
+         const client = new OpenAI({
         baseURL: 'https://api.groq.com/openai/v1',
         apiKey: process.env.GROQ_API_KEY
     })
@@ -72,6 +97,7 @@ export const aiTextConverter = async(req: Request, res: Response) => {
     }
 
     res.status(200).json({Generated_result: response.choices[0].message.content, articulation: articulation});
+        
     }else{
         res.status(401).json({message: "this user is not authenticated/authorised to call this"})
     }
