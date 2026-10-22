@@ -7,11 +7,11 @@ import { billingOperations, billingSubscriptions, billingWebhookEvents, users } 
 const apiUrl = () => process.env.BACHS_API_URL || "https://sandbox-api.bachs.io";
 const accessStatuses = new Set(["trialing", "active", "past_due"]);
 const getPlanProduct = (plan: string) => ({
-  pro: process.env.BACHS_PRO_MONTHLY,
+  // pro: process.env.BACHS_PRO_MONTHLY,
   // ultra: process.env.BACHS_ULTRA_MONTHLY,
+  pro: process.env.BACHS_PRO_DAILY,
   ultra: process.env.BACHS_ULTRA_DAILY,
-  daily: process.env.BACHS_PRO_DAILY,
-  monthly: process.env.BACHS_PRO_MONTHLY,
+  // monthly: process.env.BACHS_PRO_MONTHLY,
 }[plan]);
  
 type BachsSubscription = {

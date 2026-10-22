@@ -59,7 +59,8 @@ export const aiTextConverter = async(req: Request, res: Response) => {
     const content = response.choices[0].message.content;
     
     if (!content) {
-    throw new Error("AI returned no content");
+        return res.status(404).json({message: "content body not found!"})
+    // throw new Error("AI returned no content");
     }
 
     // in V2, i'll make the title Ai generated
