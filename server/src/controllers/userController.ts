@@ -2,7 +2,12 @@ import { eq } from "drizzle-orm"
 import { db } from "../db/db.js"
 import { users } from "../db/schema.js"
 import { Request, Response } from "express";
+import z from "zod";
 
+
+const updateNameSchema = z.object({
+    name: z.string().trim().min(1, "Name is required").max(100, "Name must be 100 characters or fewer")
+})
 
 export const findUserByToken = async(token: string) => {
     try {
@@ -52,4 +57,38 @@ export const getUser = async(req: Request, res: Response) => {
     } catch (error) {
         return res.status(500).json({message: "something went wrong finding user"})
     }
+}
+
+export const updateUser = async(req: Request, res: Response) => {
+
+    const user = req.user;
+        if(!user){
+            return res.status(401).json({message: "user does not exist"})
+        }
+
+    const result = updateNameSchema.safeParse(req.body);
+        if (!result.success) { return res.status(400).json({ message: "Validation failed", errors: result.error.flatten(), }); }
+        const {name} = result.data;
+
+        try {
+        const [updatedUser] = await db.update(users).set({
+            name,
+            updated_at: new Date(),
+        }).where(eq(users.id, user.id)).returning({
+            id: users.id,
+            name: users.name,
+            email: users.email,
+            createdAt: users.created_at,
+            updatedAt: users.updated_at,
+        });
+
+        if (!updatedUser) {
+            return res.status(400).json({message: "Failed to update profile"});
+        }
+
+        return res.status(200).json({message: "Profile updated", user: updatedUser});
+        } catch (error) {
+            console.log("Update error:", error);
+           return res.status(500).json({message: "failed, something went wrong"}); 
+        }
 }

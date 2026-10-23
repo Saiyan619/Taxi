@@ -1,7 +1,11 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { deleteAllContentGenerated, deleteContentGenerated, generateContent, getContentGenerated } from "../api/aiApi"
 import { toast } from "@/components/ui/toast";
+import axios from "axios";
 
+type ApiErrorResponse = {
+    message?: string;
+};
 
 export const useGenerateContent = () => {
     const {mutateAsync: generate, isPending, data} = useMutation({
@@ -15,10 +19,16 @@ export const useGenerateContent = () => {
         },
         onError: (error) => {
             console.error("Error generating content:", error);
+            const isForbidden = axios.isAxiosError<ApiErrorResponse>(error)
+                && error.response?.status === 403;
+            const description = isForbidden
+                ? error.response?.data?.message ?? "Content generation is not available."
+                : "Failed to generate content. Please try again.";
+
             toast.add({
                 type: "error",
                 title: "Content Generation Failed",
-                description: `Failed to generate content. Please try again.`,
+                description,
                 priority: "high",
             });
         }

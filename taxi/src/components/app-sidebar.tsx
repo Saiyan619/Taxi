@@ -61,6 +61,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useGetGeneratedContent } from "@/features/ai/hooks/aiHook";
 import { useLogout } from "@/features/auth/hooks/authHook";
+import { useCreateBillingPortal } from "@/features/billing/hooks/billingHook";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -118,6 +119,7 @@ export function AppSidebar() {
   const [logoutDialogOpen, setLogoutDialogOpen] = React.useState(false);
   const { generatedData } = useGetGeneratedContent();
   const { logoutUser, isPending: isLoggingOut } = useLogout();
+  const { openPortal, isPending: isPortalPending } = useCreateBillingPortal();
 
   const isActive = (url: string) => location.pathname === url;
 
@@ -382,9 +384,17 @@ export function AppSidebar() {
                     <User className="size-4" />
                     Account
                   </DropdownMenuItem>
-                  <DropdownMenuItem render={<Link to="/billing" />} className="gap-2">
-                    <CreditCard className="size-4" />
-                    Billing
+                  <DropdownMenuItem
+                    className="gap-2"
+                    onClick={() => void openPortal()}
+                    disabled={isPortalPending}
+                  >
+                    {isPortalPending ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <CreditCard className="size-4" />
+                    )}
+                    {isPortalPending ? "Opening billing..." : "Billing"}
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
