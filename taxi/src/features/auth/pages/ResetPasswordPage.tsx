@@ -13,8 +13,6 @@ import {
 import { usePasswordReset } from "../hooks/authHook";
 import { Link, useParams } from "react-router";
 
-const email = "alex@company.com";
-
 type Strength = "empty" | "weak" | "medium" | "strong";
 
 const getStrength = (password: string): Strength => {
@@ -69,7 +67,7 @@ const ResetPasswordPage = () => {
         <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5">
           <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
           <span className="text-[11px] text-primary font-medium">
-            Link verified for {email}
+            Password reset link verified
           </span>
         </div>
 

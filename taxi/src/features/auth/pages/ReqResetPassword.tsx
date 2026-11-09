@@ -57,7 +57,7 @@ const ReqResetPassword = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="alex@company.com"
+                placeholder="you@example.com"
                 required
                 className="bg-background border-border text-foreground placeholder:text-muted-foreground h-11 pl-9"
               />

@@ -13,7 +13,6 @@ import {
   Settings,
   HelpCircle,
   MessageSquare,
-  Plus,
   LogOut,
   Loader2,
   User,
@@ -60,6 +59,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useGetGeneratedContent } from "@/features/ai/hooks/aiHook";
 import { useLogout } from "@/features/auth/hooks/authHook";
+import { useGetMe } from "@/features/home/hooks/userHook";
 import { useCreateBillingPortal } from "@/features/billing/hooks/billingHook";
 import {
   AlertDialog,
@@ -75,11 +75,6 @@ import {
 // ---------------------------------------------------------------------------
 // Static data — swap these for real data from your auth/session + API layer.
 // ---------------------------------------------------------------------------
-
-const workspaces = [
-  { name: "Taxci Inc.", plan: "Pro" },
-  { name: "Personal", plan: "Free" },
-];
 
 const mainNav = [
   { title: "Home", url: "/home", icon: LayoutDashboard },
@@ -104,86 +99,42 @@ const secondaryNav = [
   { title: "Feedback", url: "/feedback", icon: MessageSquare },
 ] as const;
 
-const currentUser = {
-  name: "Olaniyi Adisa",
-  email: "olaniyi@acme.com",
-  avatarUrl: "",
-};
-
 // ---------------------------------------------------------------------------
 
 export function AppSidebar() {
   const location = useLocation();
-  const [activeWorkspace, setActiveWorkspace] = React.useState(workspaces[0]);
   const [logoutDialogOpen, setLogoutDialogOpen] = React.useState(false);
   const { generatedData } = useGetGeneratedContent();
+  const { data: profileData } = useGetMe();
   const { logoutUser, isPending: isLoggingOut } = useLogout();
   const { openPortal, isPending: isPortalPending } = useCreateBillingPortal();
 
   const isActive = (url: string) => location.pathname === url;
+  const currentUser = {
+    name: profileData?.user.name?.trim() || "User",
+    email: profileData?.user.email || "arokoyueb11@gmail.com",
+    avatarUrl: "",
+  };
 
   return (
     <Sidebar collapsible="icon" variant="inset">
       {/* ---------------------------------------------------------------- */}
-      {/* Header: workspace switcher                                       */}
+      {/* Header: workspace identity                                      */}
       {/* ---------------------------------------------------------------- */}
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                render={
-                  <SidebarMenuButton
-                    size="lg"
-                    className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                  />
-                }
-              >
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Building2 className="size-4" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">
-                    {activeWorkspace.name}
-                  </span>
-                  <span className="truncate text-xs text-sidebar-foreground/60">
-                    {activeWorkspace.plan} plan
-                  </span>
-                </div>
-                <ChevronsUpDown className="ml-auto size-4 text-sidebar-foreground/50" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-(--radix-dropdown-menu-trigger-width) min-w-56"
-                align="start"
-                side="right"
-                sideOffset={4}
-              >
-                <DropdownMenuGroup>
-                  <DropdownMenuLabel className="text-xs text-muted-foreground">
-                    Workspaces
-                  </DropdownMenuLabel>
-                  {workspaces.map((ws) => (
-                    <DropdownMenuItem
-                      key={ws.name}
-                      onClick={() => setActiveWorkspace(ws)}
-                      className="gap-2"
-                    >
-                      <div className="flex size-6 items-center justify-center rounded-md border">
-                        <Building2 className="size-3.5" />
-                      </div>
-                      {ws.name}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <DropdownMenuItem className="gap-2">
-                    <Plus className="size-4" />
-                    Add workspace
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <SidebarMenuButton size="lg">
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                <Building2 className="size-4" />
+              </div>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-medium">Taxci Inc.</span>
+                <span className="truncate text-xs text-sidebar-foreground/60">
+                  Taxi
+                </span>
+              </div>
+            </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>

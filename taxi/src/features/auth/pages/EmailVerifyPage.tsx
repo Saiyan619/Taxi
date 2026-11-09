@@ -17,7 +17,6 @@ import { useSearchParams } from "react-router";
 import { useVerifyEmail } from "../hooks/authHook";
 
 const EmailVerifyPage = () => {
-  // const email = "alex@company.com";
   const [progress, setProgress] = useState(0);
   const [searchParams] = useSearchParams();
   const { verifyEmail, isPending, isError } = useVerifyEmail();
@@ -111,9 +110,8 @@ const EmailVerifyPage = () => {
               Verifying your email
             </h1>
             <p className="mt-3 text-center text-sm text-muted-foreground leading-relaxed">
-              Hang tight while we confirm{" "} your email address.
-              {/* <span className="font-semibold text-foreground">{email}</span>. */}
-              This should only take a moment.
+              Hang tight while we confirm your email address. This should only
+              take a moment.
             </p>
           </>
         ) : isError ? (
@@ -133,10 +131,8 @@ const EmailVerifyPage = () => {
               Email verified successfully
             </h1>
             <p className="mt-3 text-center text-sm text-muted-foreground leading-relaxed">
-              Your email{" "}
-              {/* <span className="font-semibold text-foreground">{email}</span>{" "} */}
-              has been verified. Your Taxi workspace is primed and ready to
-              transform chaotic brain-dumps into polished prose.
+              Your email has been verified. Your Taxi workspace is primed and
+              ready to transform chaotic brain-dumps into polished prose.
             </p>
           </>
         )}
