@@ -14,12 +14,11 @@ import {
   HelpCircle,
   MessageSquare,
   Plus,
-  Search,
   LogOut,
   Loader2,
   User,
   CreditCard,
-  Bell,
+  // Bell, // TODO: come back to implementing notifications — re-enable this import too.
   // ChevronRight,
   Building2,
 } from "lucide-react";
@@ -187,22 +186,6 @@ export function AppSidebar() {
             </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>
-
-        {/* Quick search trigger */}
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              variant="outline"
-              className="text-sidebar-foreground/60"
-            >
-              <Search className="size-4" />
-              <span>Quick search</span>
-              <kbd className="ml-auto inline-flex h-5 items-center gap-0.5 rounded border border-sidebar-border bg-sidebar px-1.5 font-mono text-[10px] text-sidebar-foreground/50 group-data-[collapsible=icon]:hidden">
-                ⌘K
-              </kbd>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
       </SidebarHeader>
 
       <SidebarSeparator />
@@ -300,10 +283,15 @@ export function AppSidebar() {
       <SidebarSeparator />
 
       {/* ---------------------------------------------------------------- */}
-      {/* Footer: notifications + user menu                                 */}
+      {/* Footer: user menu                                                */}
       {/* ---------------------------------------------------------------- */}
       <SidebarFooter>
         <SidebarMenu>
+          {/**
+           * TODO (coming back to this): notifications are commented out for now.
+           * Restore the block below once /notifications exists and the badge
+           * reads real unread counts instead of the hardcoded 3.
+           *
           <SidebarMenuItem>
             <SidebarMenuButton render={<Link to="/notifications" />} size="sm">
               <Bell />
@@ -313,6 +301,7 @@ export function AppSidebar() {
               </SidebarMenuBadge>
             </SidebarMenuButton>
           </SidebarMenuItem>
+           */}
 
           <SidebarMenuItem>
             <DropdownMenu>

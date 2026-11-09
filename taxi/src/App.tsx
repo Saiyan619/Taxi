@@ -15,6 +15,8 @@ import { intializeAuth } from './features/auth/api/initializeAuth';
 import { useEffect } from 'react';
 import ArticulationsPage from './features/home/pages/ArticulationsPage';
 import SettingsPage from './features/settings/pages/SettingsPage';
+import HelpSupportPage from './features/support/pages/HelpSupportPage';
+import FeedbackPage from './features/feedback/pages/FeedbackPage';
 
 const queryClient = new QueryClient();
 
@@ -52,6 +54,8 @@ function App() {
             <Route path="/home" element={<Home />} />
             <Route path="/articulations" element={<ArticulationsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/help" element={<HelpSupportPage />} />
+            <Route path="/feedback" element={<FeedbackPage />} />
           </Route>
         </Route>
 
