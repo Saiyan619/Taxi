@@ -4,6 +4,7 @@ export type BillingPlan = "pro" | "ultra";
 
 export type BillingStatus = {
   subscription: {
+    plan: BillingPlan | null;
     status: string;
     hasAccess: boolean;
     cancelAtPeriodEnd: boolean;

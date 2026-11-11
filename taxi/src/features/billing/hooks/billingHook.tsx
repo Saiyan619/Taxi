@@ -7,6 +7,7 @@ import {
   getBillingStatus,
   type BillingPlan,
 } from "../api/billingApi";
+import { useGetMe } from "@/features/home/hooks/userHook";
 
 const billingStatusKey = ["billing-status"];
 
@@ -23,11 +24,14 @@ const showBillingError = (title: string, error: unknown) => {
 };
 
 export const useBillingStatus = () => {
+  const { data: profileData } = useGetMe();
+  const userId = profileData?.user.id;
+
   const query = useQuery({
-    queryKey: billingStatusKey,
+    queryKey: [...billingStatusKey, userId],
     queryFn: getBillingStatus,
-    staleTime: Infinity,           // Data will never be considered stale
-    gcTime: Infinity, 
+    enabled: Boolean(userId),
+    staleTime: 0,
   });
 
   return {

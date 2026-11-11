@@ -13,6 +13,16 @@ const getPlanProduct = (plan: string) => ({
   ultra: process.env.BACHS_ULTRA_DAILY,
   // monthly: process.env.BACHS_PRO_MONTHLY,
 }[plan]);
+
+const getPlanForProduct = (productId: string) => {
+  if ([process.env.BACHS_PRO_DAILY, process.env.BACHS_PRO_MONTHLY].includes(productId)) {
+    return "pro" as const;
+  }
+  if ([process.env.BACHS_ULTRA_DAILY, process.env.BACHS_ULTRA_MONTHLY].includes(productId)) {
+    return "ultra" as const;
+  }
+  return null;
+};
  
 type BachsSubscription = {
   subscription_id: string;
@@ -204,5 +214,13 @@ export const webhook = async (req: Request, res: Response) => {
 
 export const billingStatus = async (req: Request, res: Response) => {
   const [subscription] = await db.select().from(billingSubscriptions).where(eq(billingSubscriptions.userId, req.user.id));
-  return res.status(200).json({ subscription: subscription ? { ...subscription, hasAccess: accessStatuses.has(subscription.status) } : null });
+  return res.status(200).json({
+    subscription: subscription
+      ? {
+          ...subscription,
+          plan: getPlanForProduct(subscription.productId),
+          hasAccess: accessStatuses.has(subscription.status),
+        }
+      : null,
+  });
 };

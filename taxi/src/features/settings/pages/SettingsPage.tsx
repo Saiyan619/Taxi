@@ -32,7 +32,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useCreateBillingPortal } from "@/features/billing/hooks/billingHook";
+import {
+  useBillingStatus,
+  useCreateBillingPortal,
+} from "@/features/billing/hooks/billingHook";
 import {
   useDeleteAllGeneratedContent,
   useGetGeneratedContent,
@@ -107,6 +110,7 @@ function SettingSectionHeading({
 export default function SettingsPage() {
   const { data: profileData, isLoading: isProfileLoading } = useGetMe();
   const { updateUser, isPending: isUpdatingUser } = useUpdateUser();
+  const { billing, isLoading: isBillingLoading } = useBillingStatus();
   const { openPortal, isPending: isPortalPending } = useCreateBillingPortal();
   const { refetch: refetchGeneratedContent } = useGetGeneratedContent();
   const { deleteAllContent, isPending: isDeletingAll } =
@@ -118,6 +122,10 @@ export default function SettingsPage() {
   const [isDeleteHistoryDialogOpen, setIsDeleteHistoryDialogOpen] =
     useState(false);
   const user = profileData?.user;
+  const hasActiveSubscription = Boolean(billing?.subscription?.hasAccess);
+  const planName = billing?.subscription?.plan
+    ? `${billing.subscription.plan[0].toUpperCase()}${billing.subscription.plan.slice(1)}`
+    : "Free";
 
   useEffect(() => {
     if (user?.name) {
@@ -334,20 +342,36 @@ export default function SettingsPage() {
           <CardContent>
             <div className="flex items-center justify-between rounded-xl bg-muted/50 p-4">
               <div>
-                <p className="font-medium">Pro plan</p>
+                <p className="font-medium">
+                  {isBillingLoading ? "Loading plan..." : `${planName} plan`}
+                </p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  50 rewrites per month
+                  {hasActiveSubscription
+                    ? billing?.subscription?.plan === "ultra"
+                      ? "30 rewrites per month"
+                      : "20 rewrites per month"
+                    : "10 rewrites per month"}
                 </p>
               </div>
-              <Badge variant="secondary" className="rounded-full">Active</Badge>
+              <Badge variant="secondary" className="rounded-full">
+                {isBillingLoading
+                  ? "Checking..."
+                  : hasActiveSubscription
+                    ? "Active"
+                    : "Inactive"}
+              </Badge>
             </div>
             <Button
               variant="outline"
               className="mt-4 w-full"
               onClick={() => void openPortal()}
-              disabled={isPortalPending}
+              disabled={isPortalPending || !hasActiveSubscription}
             >
-              {isPortalPending ? "Opening billing..." : "Manage billing"}
+              {isPortalPending
+                ? "Opening billing..."
+                : hasActiveSubscription
+                  ? "Manage billing"
+                  : "No active billing"}
             </Button>
           </CardContent>
         </Card>
