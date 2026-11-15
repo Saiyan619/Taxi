@@ -11,7 +11,7 @@ const promptSchema = z.object({
     tone: z.string()
 })
 
-const LIMITS = { free: 10, pro: 20, ultra: 30 };
+const LIMITS = { free: 10, pro: 30, ultra: 50 };
 
 
 
