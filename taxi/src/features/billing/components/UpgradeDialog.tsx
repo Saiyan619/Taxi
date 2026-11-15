@@ -33,7 +33,7 @@ const plans: Array<{
     name: "Pro",
     price: "$10",
     description: "For consistent everyday writing.",
-    features: ["50 rewrites per month", "All writing tones", "Saved rewrite history"],
+    features: ["30 rewrites per month", "All writing tones", "Saved rewrite history"],
     featured: true,
   },
   {
@@ -41,7 +41,7 @@ const plans: Array<{
     name: "Ultra",
     price: "$50",
     description: "For unlimited rewriting.",
-    features: ["Unlimited rewrites", "All writing tones", "Saved rewrite history"],
+    features: ["50 rewrites", "All writing tones", "Saved rewrite history"],
   },
 ];
 
