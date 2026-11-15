@@ -43,12 +43,6 @@ const requireConfig = (name: string) => {
 };
 
 async function bachsPost(path: string, body: object, idempotencyKey: string) {
-  console.log("[billing] BACHS request", {
-    apiHost: new URL(apiUrl()).host,
-    path: `/v1${path}`,
-    idempotencyKey,
-    hasProductCart: "product_cart" in body,
-  });
   const response = await fetch(`${apiUrl()}/v1${path}`, {
     method: "POST",
     headers: {
@@ -59,11 +53,6 @@ async function bachsPost(path: string, body: object, idempotencyKey: string) {
     body: JSON.stringify(body),
   });
   const responseBody = await response.text();
-  console.log("[billing] BACHS response", {
-    status: response.status,
-    ok: response.ok,
-    hasBody: Boolean(responseBody),
-  });
   if (!response.ok) throw new Error(`BACHS request failed with status ${response.status}`);
   return JSON.parse(responseBody) as Record<string, unknown>;
 }
@@ -79,33 +68,14 @@ export const checkout = async (req: Request, res: Response) => {
     const plan = typeof req.body?.plan === "string" ? req.body.plan : "";
     const attemptId = typeof req.body?.attemptId === "string" ? req.body.attemptId : "";
     const productId = getPlanProduct(plan);
-    console.log("[billing] Checkout request received", {
-      hasUserId: Boolean(userId),
-      plan,
-      attemptId,
-      hasProductId: Boolean(productId),
-      apiHost: new URL(apiUrl()).host,
-    });
     if (!userId) return res.status(401).json({ message: "Authentication required" });
-    if (!productId) {
-      console.error("[billing] Checkout rejected: product is not configured", { plan });
-      return res.status(400).json({ message: "Unknown plan" });
-    }
+    if (!productId) return res.status(400).json({ message: "Unknown plan" });
     if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(attemptId)) {
-      console.error("[billing] Checkout rejected: invalid attempt ID", { plan, attemptId });
       return res.status(400).json({ message: "A valid checkout attempt ID is required" });
     }
 
     const [existing] = await db.select().from(billingSubscriptions).where(eq(billingSubscriptions.userId, userId));
-    console.log("[billing] Existing subscription checked", {
-      hasSubscription: Boolean(existing),
-      status: existing?.status ?? null,
-      productId: existing?.productId ?? null,
-    });
     if (existing && accessStatuses.has(existing.status)) {
-      console.log("[billing] Checkout rejected: subscription already active", {
-        status: existing.status,
-      });
       return res.status(409).json({ message: "Subscription already active", manageBilling: true });
     }
     
@@ -130,36 +100,17 @@ export const checkout = async (req: Request, res: Response) => {
       billing_currency: process.env.BACHS_BILLING_CURRENCY || "USD",
       metadata: { user_id: userId },
     };
-    console.log("[billing] Checkout payload prepared", {
-      plan,
-      productId,
-      hasExistingCustomer: Boolean(existing),
-      currency: body.billing_currency,
-      hasSuccessUrl: Boolean(body.success_url),
-      hasCancelUrl: Boolean(body.cancel_url),
-    });
     if (process.env.CHECKOUT_SUCCESS_URL) body.success_url = process.env.CHECKOUT_SUCCESS_URL;
     if (process.env.CHECKOUT_CANCEL_URL) body.cancel_url = process.env.CHECKOUT_CANCEL_URL;
     const result = await bachsPost("/checkout-sessions", body, idempotencyKey);
-    if (typeof result.checkout_url !== "string") {
-      console.error("[billing] BACHS response missing checkout URL", {
-        hasCheckoutId: typeof result.checkout_id === "string",
-      });
-      throw new Error("BACHS checkout response did not include checkout_url");
-    }
+    if (typeof result.checkout_url !== "string") throw new Error("BACHS checkout response did not include checkout_url");
     await db.update(billingOperations).set({
       checkoutId: typeof result.checkout_id === "string" ? result.checkout_id : null,
       checkoutUrl: result.checkout_url,
     }).where(eq(billingOperations.idempotencyKey, idempotencyKey));
-    console.log("[billing] Checkout session created", {
-      hasCheckoutId: typeof result.checkout_id === "string",
-      operationSaved: true,
-    });
     return res.status(200).json({ checkout_url: result.checkout_url });
   } catch (error) {
-    console.error("[billing] Unable to create BACHS checkout", {
-      error: error instanceof Error ? error.message : "Unknown error",
-    });
+    console.error("Unable to create BACHS checkout", error);
     return res.status(502).json({ message: "Checkout outcome is uncertain; retry the same request" });
   }
 };
