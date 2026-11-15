@@ -59,7 +59,8 @@ export function UpgradeDialog({ open, onOpenChange }: UpgradeDialogProps) {
     setSelectedPlan(plan);
     // A new click represents a new checkout attempt. The same ID remains
     // attached to retries of this request for idempotent BACHS behavior.
-    await checkout({ plan, attemptId: crypto.randomUUID() });
+    const attemptId = crypto.randomUUID();
+    await checkout({ plan, attemptId });
   };
 
   return (

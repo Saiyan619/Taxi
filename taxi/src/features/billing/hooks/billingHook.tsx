@@ -49,7 +49,17 @@ export const useCreateCheckout = () => {
       queryClient.invalidateQueries({ queryKey: billingStatusKey });
       window.location.assign(data.checkout_url);
     },
-    onError: (error) => showBillingError("Unable to start checkout", error),
+    onError: (error) => {
+      if (axios.isAxiosError(error)) {
+              console.error("[billing] Checkout mutation failed", {
+          status: error.response?.status,
+          message: error.response?.data?.message ?? error.message,
+        });
+      } else {
+        console.error("[billing] Checkout mutation failed", error);
+      }
+      showBillingError("Unable to start checkout", error);
+    },
   });
 
   return {

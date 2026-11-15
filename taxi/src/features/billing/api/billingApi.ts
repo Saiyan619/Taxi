@@ -18,9 +18,18 @@ export const getBillingStatus = async () => {
 };
 
 export const createCheckout = async (plan: BillingPlan, attemptId: string) => {
+  console.log("[billing] Creating checkout request", {
+    plan,
+    attemptId,
+    endpoint: "/payment/checkout",
+  });
   const response = await apiClient.post<{ checkout_url: string }>("/payment/checkout", {
     plan,
     attemptId,
+  });
+  console.log("[billing] Checkout response received", {
+    status: response.status,
+    hasCheckoutUrl: Boolean(response.data.checkout_url),
   });
   return response.data;
 };
